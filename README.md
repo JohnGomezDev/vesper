@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vesper
 
-## Getting Started
+App web para aficionados a la astronomía que responde a una pregunta: **¿cómo está el cielo en este lugar, esta noche o en otra noche cercana, y qué objetos podría observar?**
 
-First, run the development server:
+Combina dos fuentes:
+
+- **Clima** de [Open-Meteo](https://open-meteo.com): nubosidad por capas, visibilidad, humedad, viento y precipitación.
+- **Astronomía calculada localmente** con [astronomy-engine](https://github.com/cosinekitty/astronomy): Sol, Luna, planetas, crepúsculos y ventanas de observación.
+
+Es un proyecto personal y de portafolio: no es comercial, no tiene dominio propio y la interfaz está en español.
+
+> **Estado:** etapa inicial. La app todavía no está construida y varios detalles pueden cambiar. La especificación funcional y de arquitectura completa vive en [`SPEC.md`](./SPEC.md).
+
+## Stack previsto
+
+- Next.js 16 (App Router) + React + TypeScript
+- Tailwind CSS v4
+- TanStack Query v5
+- `fetch` nativo
+- astronomy-engine + Open-Meteo
+- Hosting: Vercel
+
+## Empezar
+
+Requiere [pnpm](https://pnpm.io).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en el navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentación
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [`SPEC.md`](./SPEC.md) — especificación funcional y de arquitectura.
+- [`AGENTS.md`](./AGENTS.md) — convenciones de código y reglas para agentes.
