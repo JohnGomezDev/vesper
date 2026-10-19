@@ -152,8 +152,8 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 
 | Task | Fase | Título                                                       | Depende de             | Estado    |
 | ---- | ---- | ------------------------------------------------------------ | ---------------------- | --------- |
-| T001 | F0   | Verificar Open-Meteo, Vercel y el stack de caché             | —                      | Pendiente |
-| T002 | F0   | Verificar astronomy-engine y recopilar datos del dueño       | —                      | Pendiente |
+| T001 | F0   | Verificar Open-Meteo, Vercel y el stack de caché             | —                      | Terminada |
+| T002 | F0   | Verificar astronomy-engine y recopilar datos del dueño       | —                      | Terminada |
 | T003 | F1   | Dependencias, scripts y configuración base                   | T001                   | Pendiente |
 | T004 | F1   | Esqueleto base: Provider, layout, base visual y rutas        | T003                   | Pendiente |
 | T005 | F2   | Tipos de dominio y validación de URL                         | T004                   | Pendiente |

@@ -4,7 +4,7 @@
 - **SPEC:** §5.4, §9, §11
 - **Depende de:** —
 - **Desbloquea:** T012, T013, T019, T025
-- **Estado:** Pendiente
+- **Estado:** Completada (2026-10-19)
 
 ## Objetivo
 
@@ -50,10 +50,10 @@ Sección nueva en `docs/specs/001-vesper/verification-notes.md` con la firma exa
 
 ## Criterios de aceptación
 
-- [ ] Cada capacidad del §5.4 tiene función confirmada o sustituto documentado.
-- [ ] Está claro si la culminación es nativa o muestreada.
-- [ ] La refracción queda documentada como activa.
-- [ ] Los datos de Tatacoa, Checua y Lago de Tota figuran como pendientes del dueño, sin valores inventados.
+- [x] Cada capacidad del §5.4 tiene función confirmada o sustituto documentado.
+- [x] Está claro si la culminación es nativa o muestreada. → Nativa: `SearchHourAngle(body, observer, 0, dateStart)`.
+- [x] La refracción queda documentada como activa. → Activa pasando `"normal"` (no por defecto); `SearchRiseSet` siempre, `SearchAltitude` la omite por convención.
+- [x] Los datos de Tatacoa, Checua y Lago de Tota figuran como pendientes del dueño, sin valores inventados.
 
 ## Verificación
 
@@ -63,3 +63,37 @@ Sección nueva en `docs/specs/001-vesper/verification-notes.md` con la firma exa
 ## Notas y bloqueos
 
 - T019 y T025 quedan bloqueadas en su parte de contenido hasta que el dueño entregue los datos.
+
+---
+
+## Registro de ejecución (2026-10-19)
+
+### Resultado
+
+Completada. Se confirmaron las firmas reales de astronomy-engine contra el `.d.ts` publicado del paquete `astronomy-engine@2.1.19` (npm `latest`) y el README oficial, y se dejó cerrada la petición de datos al dueño sin rellenar nada.
+
+- Fase lunar: `MoonPhase(date)`.
+- Fracción iluminada: `Illumination(body, date).phase_fraction`.
+- Altitud y azimut: `Equator(...)` + `Horizon(date, observer, ra, dec, refraction)`; observador `Observer(latitude, longitude, height)`.
+- Salida y puesta: `SearchRiseSet(body, observer, direction, dateStart, limitDays, metersAboveGround?)`; `direction` numérico (`+1`/`-1`).
+- Crepúsculos: `SearchAltitude(...)`.
+- Elongación: `Elongation(body, date)`.
+- Magnitud: `Illumination(body, date).mag`.
+- Separación angular: sin función directa; sustituto `AngleBetween(a, b)` con vectores de `Equator` (y `AngleFromSun` para Sol–cuerpo).
+- Culminación: nativa con `SearchHourAngle(body, observer, 0, dateStart)`.
+- Refracción: activa al pasar `"normal"`; `SearchRiseSet` siempre; `SearchAltitude` la omite por convención.
+
+### Archivos tocados
+
+- `docs/specs/001-vesper/verification-notes.md` — nuevas secciones 12 a 16 (T002) y encabezado con índice. No se tocó ninguna sección de T001.
+- `docs/specs/001-vesper/SPEC.md` — §5.4 (tabla de funciones confirmadas y refracción) y §13 (bloque «Verificado en T002» y pendientes reformulados).
+- `docs/specs/001-vesper/tasks/T002-verificar-astronomy-engine-datos-dueno.md` — estado, criterios y este registro.
+
+### Desviaciones
+
+1. **Refracción descrita como «siempre activa» en el SPEC §5.4.** La librería no la aplica por defecto: hay que pasar `"normal"` a `Horizon`, y `SearchAltitude` la omite a propósito. Se corrigió la redacción del SPEC según lo indicado por el dueño («usa lo más conveniente»): la app pasa `"normal"` siempre y los crepúsculos son la excepción intencionada. No se reabrió ninguna decisión `[CERRADO]`.
+2. **Separación angular sin función propia.** El SPEC §5.4 pedía «separación angular entre dos cuerpos». No existe tal función en la 2.1.19; se documentó `AngleBetween` sobre vectores de `Equator` como sustituto confirmado.
+3. **Verificación contra el paquete publicado, no contra `node_modules`.** astronomy-engine no está instalado (añadirlo es T003). La firma se tomó del `.d.ts` de la versión publicada 2.1.19, que es la misma que verá TypeScript al instalar.
+4. **`direction` es numérico en JavaScript.** La documentación de otros lenguajes usa un enum (`Direction.Rise`/`Direction.Set`); en JS son `+1`/`-1`. Queda anotado para no inventar un enum.
+5. **`Elongation.visibility` llega en inglés** (`"morning"`/`"evening"`); la traducción a «de la mañana»/«de la tarde» la hace la app (SPEC §8.5).
+6. **Datos del dueño pendientes.** Tatacoa, Checua y Lago de Tota siguen sin datos; no se inventó ninguna coordenada, altitud ni zona horaria. La petición con los campos exactos (`slug`, `name`, `latitude`, `longitude`, `elevationM`, `timeZone`, `description`) quedó en `verification-notes.md` §15.

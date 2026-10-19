@@ -72,17 +72,17 @@ Hosting: **Vercel**. **[CERRADO]**
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Framework                        | Next.js, App Router. Se usa por enrutamiento, metadata y generación estática de ciudades curadas.                                                 |
 | UI                               | React. La app interactiva vive en componentes de cliente.                                                                                         |
-| Caché del servidor               | Data Cache de Next.js, mediante `revalidate` en el `fetch` **del servidor**. 3600 segundos.                                                       |
-| Caché del navegador              | TanStack Query (v5 **[POR VERIFICAR]**). Solo memoria de la pestaña. No hay persistencia en `localStorage` ni IndexedDB.                          |
+| Caché del servidor               | Data Cache de Next.js: `'use cache'` + `cacheLife` en la función de datos **del servidor**. 3600 segundos.                                        |
+| Caché del navegador              | TanStack Query v5 **[VERIFICADO]**. Solo memoria de la pestaña. No hay persistencia en `localStorage` ni IndexedDB.                                |
 | Cliente HTTP                     | `fetch` nativo. **No axios.**                                                                                                                     |
 | Astronomía                       | astronomy-engine, calculada localmente (sin red).                                                                                                 |
 | Datos de clima y geocodificación | Open-Meteo, plan gratuito, sin API key.                                                                                                           |
-| Hosting                          | Vercel. Debe poder leer las cabeceras de IP del visitante. **No usar exportación estática pura** (`output: 'export'`), porque rompe `revalidate`. |
+| Hosting                          | Vercel. Debe poder leer las cabeceras de IP del visitante. **No usar exportación estática pura** (`output: 'export'`), porque rompe la caché del servidor. |
 
 ### 3.1 Principio rector de la caché **[CERRADO]**
 
-- **Ciudades curadas:** el servidor pide el pronóstico a Open-Meteo con `revalidate: 3600` y lo entrega incrustado en la página. 3600 s coincide con el `staleTime` del cliente, así que el HTML y la query envejecen al mismo ritmo. Un valor menor multiplica llamadas del servidor sin mejorar la hora ya mostrada; uno mayor desalinearía los dos relojes.
-- **Ese `revalidate` no aplica a ningún `fetch` del navegador.** La función compartida debe bifurcar: en servidor, `next: { revalidate: 3600 }`; en cliente, `cache: 'no-store'`. En el cliente la frescura la decide solo TanStack Query.
+- **Ciudades curadas:** el servidor pide el pronóstico a Open-Meteo dentro de una función `'use cache'` con `cacheLife` de 3600 s y lo entrega incrustado en la página. 3600 s coincide con el `staleTime` del cliente, así que el HTML y la query envejecen al mismo ritmo. Un valor menor multiplica llamadas del servidor sin mejorar la hora ya mostrada; uno mayor desalinearía los dos relojes.
+- **Ese `cacheLife` no aplica a ningún `fetch` del navegador.** La capa compartida debe separar dos caminos: un wrapper de servidor marcado `'use cache'` con `cacheLife`, que llama a la función común; y el camino de cliente con `cache: 'no-store'`. En el cliente la frescura la decide solo TanStack Query.
 - **Todo lo demás** (lugares no curados, bloque "ahora", geocodificación): **solo desde el navegador**, para que cada usuario consuma su propio límite de Open-Meteo.
 - La ruta `/` consulta las cabeceras de IP, pero **no llama a Open-Meteo**.
 
@@ -148,6 +148,8 @@ No se envía `elevation`. La altitud del observador para astronomy-engine es la 
 
 `sunrise`, `sunset`.
 
+Opcional, solo para verificación cruzada: `moon_phase` (fracción 0–1 de la lunación; nunca es fuente de la Luna). **[VERIFICADO]**
+
 **Variables actuales (`current`)**
 
 `temperature_2m`, `relative_humidity_2m`, `dew_point_2m`, `cloud_cover`, `wind_speed_10m`, `wind_gusts_10m`, `is_day`
@@ -155,7 +157,8 @@ No se envía `elevation`. La altitud del observador para astronomy-engine es la 
 **Estado de verificación de variables**
 
 - **[VERIFICADO]** en la página oficial de documentación: nubosidad baja/media/alta, visibilidad, `sunrise`/`sunset`, `is_day`, `moonrise`/`moonset`/`moon_phase` (diarios), `cape`, `lifted_index`, `boundary_layer_height`, viento en niveles de presión, existencia del parámetro `elevation` (no se usa), rango de 16 días de `forecast_days` y hasta 92 días de `past_days`. Los nombres correctos son `past_days` y `forecast_days`.
-- **[POR VERIFICAR]**: `dew_point_2m`, `relative_humidity_2m`, `wind_gusts_10m`, `precipitation_probability` en `hourly`/`current`; que `past_days=3` y `forecast_days=16` sean válidos juntos; el formato y la escala del valor de `moon_phase`.
+- **[VERIFICADO]** contra la respuesta real (2026-10-19, Bogotá): las 13 variables horarias, las 7 actuales y `sunrise`/`sunset`/`moon_phase` existen con el nombre escrito y devuelven datos. `past_days=3` y `forecast_days=16` son válidos juntos y devuelven 19 días. `moon_phase` es una fracción 0–1 de la lunación (0 = Luna nueva, 0,5 = Luna llena), no un porcentaje ni un ángulo; solo se usa como verificación cruzada. Detalle en `verification-notes.md` §1–§3.
+- Las unidades observadas son nubosidad y humedad en %, temperatura y punto de rocío en °C, viento y ráfagas en km/h, visibilidad en m, precipitación en mm, e `is_day` 0/1. **[VERIFICADO]**
 - Si una variable no existe, la API responde 400 con el motivo en el cuerpo. Ese mensaje debe mostrarse en desarrollo.
 
 **Ejemplo de referencia (Bogotá)**
@@ -171,7 +174,7 @@ https://api.open-meteo.com/v1/forecast?latitude=4.61&longitude=-74.08&current=te
 - Los arrays de `hourly` y `daily` son paralelos: el índice `i` de `time` corresponde al índice `i` de cada variable.
 - Cada fila horaria está sellada con el inicio de esa hora en la zona resuelta (`18:00` cubre 18:00–19:00). Una fila entra en la tira si su intervalo de una hora **solapa** la tira visible.
 - No asumir 24 filas por día. Un cambio de hora (en lugares buscados fuera de Colombia) produce días de 23 o 25 horas. Agrupar por la fecha del campo `time`.
-- Fuera de Europa central y Norteamérica, los datos de `current` probablemente son interpolados desde datos horarios. **[POR VERIFICAR]** Por eso no se espera variación fuerte entre refrescos.
+- Los datos de `current` se interpolan a intervalos de 15 minutos (`current.interval: 900`) a partir de la serie del modelo; no es un comportamiento limitado a Europa central y Norteamérica. **[VERIFICADO]** Por eso no se espera variación fuerte entre refrescos. Detalle en `verification-notes.md` §1 y §11.
 - La respuesta incluye la zona horaria y la altitud usadas. Esa zona horaria es la fuente de verdad para definir "hoy" y "esta noche". Esa altitud es la del observador astronómico.
 
 ### 5.2 Open-Meteo: geocodificación
@@ -184,8 +187,8 @@ Endpoint: `https://geocoding-api.open-meteo.com/v1/search`
 | `count`    | `7`           |
 | `language` | `es`          |
 
-- **[VERIFICADO]** Con 1 carácter devuelve vacío; con 2, solo coincidencias exactas; con 3 o más, búsqueda aproximada. La app **no busca con menos de 3 caracteres**, y solo al pulsar el botón de búsqueda.
-- Cada resultado trae al menos nombre, país y zona horaria. Latitud, longitud, altitud, identificador y región administrativa **[POR VERIFICAR]** en la respuesta real.
+- **[VERIFICADO]** Con 1 carácter devuelve vacío; con 2, solo coincidencias exactas; con 3 o más, búsqueda aproximada. La app **no busca con menos de 3 caracteres**, y solo al pulsar el botón de búsqueda. Matiz observado: con 2 caracteres, `Bo` devolvió `Bøur` (prefijo con diacríticos), así que «solo exactas» no es literal; no afecta porque la app exige 3.
+- **[VERIFICADO]** Cada resultado trae `name`, `latitude`, `longitude`, `elevation`, `id`, `timezone` y la región administrativa (`admin1`, y `admin2`/`admin3` cuando existe). `country` puede faltar en registros aislados (p. ej. `Bøur`); la UI debe tolerar país o región ausentes. Detalle en `verification-notes.md` §6.
 - El slug de un lugar buscado lleva las coordenadas del resultado (sección 6.2). No hace falta un endpoint por identificador para abrir el enlace.
 - Limitación conocida: la geocodificación cubre localidades, no sitios de observación (páramos, miradores). Los desiertos y lagos curados viven en la lista fija, no dependen de que la búsqueda los encuentre.
 
@@ -200,7 +203,7 @@ Plan gratuito, solo uso no comercial:
 | Día     | menos de 10.000 llamadas |
 | Mes     | 300.000 llamadas         |
 
-- Una petición grande puede contabilizar como más de una llamada **[POR VERIFICAR]**. Medir el peso de la consulta real con el formulario de la documentación.
+- **[VERIFICADO]** Una petición grande contabiliza como más de una llamada. Peso oficial: `max(1, max(variables/10, variables/10 × días/14) × ubicaciones)`. La consulta combinada de T001 (23 variables, 19 días, 1 ubicación) suma **≈3,12 llamadas**. Las dos peticiones separadas de la app suman ≈2,04 (pronóstico sin `moon_phase`, 15 variables) + 1,00 («ahora») ≈ 3,04; si el pronóstico incluye `moon_phase` (16 variables), ≈2,17 + 1,00 ≈ 3,17. Detalle en `verification-notes.md` §5.
 - Licencia de datos: CC-BY 4.0. **Atribución obligatoria** visible en la app (enlace a Open-Meteo).
 - Uso no comercial: sin anuncios ni suscripciones.
 - Open-Meteo se reserva el derecho de bloquear IPs o aplicaciones que abusen.
@@ -210,17 +213,21 @@ Plan gratuito, solo uso no comercial:
 
 **Observador:** latitud, longitud y altitud de la ubicación. La altitud es la `elevation` devuelta por el pronóstico. Siempre se pasa.
 
-**Capacidades requeridas** (nombres exactos de funciones **[POR VERIFICAR]** en la documentación de la librería, vía Context7 cuando esté disponible):
+**Capacidades requeridas [VERIFICADO]** contra `astronomy-engine@2.1.19` (2026-10-19). Firmas exactas tomadas del `.d.ts` publicado y del README oficial; el detalle está en `verification-notes.md` (T002). `FlexibleDateTime` es un `Date` de JavaScript en UTC.
 
-- Fase lunar como ángulo (0 a 360°) y fracción iluminada (0 a 1).
-- Altitud y azimut de Sol, Luna y planetas para un instante y un observador.
-- Búsqueda de salida y puesta de Sol y Luna.
-- Búsqueda del momento en que el Sol cruza una altitud dada (crepúsculos).
-- Elongación de planetas respecto al Sol (Mercurio, Venus).
-- Magnitud aparente de planetas.
-- Separación angular entre dos cuerpos.
-- Culminación (tránsito por el meridiano). Si la librería no la expone, usar el máximo de la serie muestreada y marcarlo como aproximado.
-- Refracción atmosférica **siempre activa** en altitudes y en salidas y puestas.
+| Capacidad | Función confirmada |
+| --------- | ------------------ |
+| Fase lunar como ángulo (0 a 360°) | `MoonPhase(date)` |
+| Fracción iluminada (0 a 1) | `Illumination(body, date).phase_fraction` |
+| Altitud y azimut de Sol, Luna y planetas para un instante y un observador | `Equator(body, date, observer, ofdate, aberration)` y después `Horizon(date, observer, ra, dec, refraction)`. El observador es `Observer(latitude, longitude, height)`, con `height` en metros (la altitud de la ubicación) |
+| Salida y puesta de Sol y Luna | `SearchRiseSet(body, observer, direction, dateStart, limitDays, metersAboveGround?)`. `direction` es `+1` (salida) o `-1` (puesta), no un enum |
+| Cruce del Sol por una altitud dada (crepúsculos) | `SearchAltitude(body, observer, direction, dateStart, limitDays, altitude)`, con `altitude` en `-6`, `-12` o `-18` grados |
+| Elongación de planetas respecto al Sol (Mercurio, Venus) | `Elongation(body, date)` → `elongation` en 0–180° y `visibility` (`"morning"`/`"evening"`; la app traduce a «de la mañana»/«de la tarde») |
+| Magnitud aparente de planetas | `Illumination(body, date).mag` |
+| Separación angular entre dos cuerpos | **No existe función directa cuerpo–cuerpo.** Se usa `AngleBetween(a, b)` con los vectores `Equator(...).vec`. Para la separación Sol–cuerpo existe `AngleFromSun(body, date)` |
+| Culminación (tránsito por el meridiano) | **Nativa:** `SearchHourAngle(body, observer, 0, dateStart)` → `HourAngleEvent` con `time` y `hor` (altitud máxima). No se usa el máximo de la serie muestreada |
+
+**Refracción atmosférica.** No está activa por defecto en la librería: la app pasa la cadena `"normal"` a `Horizon` siempre que pide altitud y azimut. `SearchRiseSet` ya la aplica siempre (corrección fija de 34 minutos de arco). `SearchHourAngle` devuelve el `hor` con `"normal"`. `SearchAltitude` (crepúsculos) **no** la aplica, de forma intencionada: la oscuridad de la sección 4 se define por la altitud geométrica del Sol.
 
 **Precisión declarada:** ±1 minuto de arco, contrastada por el autor contra NOVAS y JPL Horizons. Suficiente para el uso. Las horas de salida y puesta pueden diferir un par de minutos de la realidad por la refracción real. El horizonte físico (cerros, edificios) pesa más que cualquier error de la librería.
 
@@ -242,7 +249,7 @@ La URL es la **fuente de verdad** de la ubicación y de la noche visualizada.
 
 ### 6.1 Redirección de `/`
 
-1. Leer las cabeceras de ubicación aproximada por IP de Vercel. Los nombres exactos (`x-vercel-ip-latitude`, `x-vercel-ip-longitude` y afines) **[POR VERIFICAR]** en la documentación de Vercel.
+1. Leer las cabeceras de ubicación aproximada por IP de Vercel. Los nombres exactos son `x-vercel-ip-latitude`, `x-vercel-ip-longitude`, `x-vercel-ip-city`, `x-vercel-ip-country`, `x-vercel-ip-country-region`, `x-vercel-ip-timezone`, `x-vercel-ip-postal-code` y `x-vercel-ip-continent`. Para la IP del cliente, Vercel documenta `x-forwarded-for`, `x-vercel-forwarded-for` y `x-real-ip`. **[VERIFICADO]** Detalle en `verification-notes.md` §7.
 2. Redirigir al slug de coordenadas redondeadas de esa IP. **No** elegir una ciudad curada, aunque la IP caiga encima de una.
 3. El nombre mostrado es «Ubicación aproximada», junto con las coordenadas redondeadas. No se le asigna el nombre de una ciudad.
 4. Si no hay cabeceras (desarrollo local o IP sin datos), redirigir a la ciudad curada **Bogotá**.
@@ -277,7 +284,7 @@ Reglas:
 ### 6.3 Parámetro de noche
 
 - **`?date=YYYY-MM-DD`**: día local del lugar en el que empieza la noche. Único parámetro de fecha. No existe `days`.
-- **Se lee exclusivamente en el cliente.** Si el componente de servidor leyera `searchParams`, Next.js trataría la página como dinámica y se perdería la generación estática de las ciudades curadas. Leer parámetros de consulta en un componente de cliente puede exigir un límite de Suspense **[POR VERIFICAR]**.
+- **Se lee exclusivamente en el cliente.** Si el componente de servidor leyera `searchParams`, Next.js trataría la página como dinámica y se perdería la generación estática de las ciudades curadas. Con `cacheComponents` activo, `useSearchParams` **siempre** exige un límite de `<Suspense>`; sin él, el build de producción falla. **[VERIFICADO]** Detalle en `verification-notes.md` §9.
 - Sin `?date=`: se muestra la noche actual. Sin mensaje de error.
 - `?date=` mal formada, o fuera de D = −3…+14: la página del lugar sigue disponible, con el selector de noches, y un mensaje descriptivo («La fecha no es válida» o «La fecha seleccionada está fuera del rango disponible»). No es un 404: el lugar sí existe.
 - Cambiar la noche **no dispara ninguna petición**: una respuesta cubre las 18 noches y se filtra localmente.
@@ -315,7 +322,7 @@ Reglas:
 
 - Una **única función** arma la URL y ejecuta la petición, compartida entre servidor y cliente.
 - `fetch` no lanza error en respuestas 4xx y 5xx: la función debe comprobar `response.ok`, leer el cuerpo de error (Open-Meteo explica la causa) y lanzar un error que conserve el código de estado.
-- En el servidor se pasa `next: { revalidate: 3600 }`. En el cliente se pasa `cache: 'no-store'` y no se pasa `revalidate`.
+- En el servidor, un wrapper `'use cache'` con `cacheLife` de 3600 s llama a la función común; `next.revalidate` no es el mecanismo de caché con `cacheComponents`. En el cliente se pasa `cache: 'no-store'` y no se pasa `revalidate`.
 - Las funciones de query reciben y propagan la señal de cancelación de TanStack Query.
 
 ### 7.3 Queries de TanStack Query
@@ -340,15 +347,15 @@ Reglas:
 El HTML puede tener hasta 1 hora de antigüedad. Para que TanStack Query no crea que el dato es nuevo:
 
 1. El servidor registra la **hora real de obtención** del pronóstico y la entrega junto con él.
-2. El cliente usa el pronóstico como dato inicial **indicando esa hora de obtención** (opción de TanStack Query **[POR VERIFICAR]**, prevista como `initialDataUpdatedAt`).
+2. El cliente usa el pronóstico como dato inicial **indicando esa hora de obtención** con `initialDataUpdatedAt` (TanStack Query v5), un timestamp de JavaScript en milisegundos. **[VERIFICADO]** Detalle en `verification-notes.md` §10.
 3. Si el dato ya venció, TanStack lo refresca al montar. Resultado: la antigüedad máxima efectiva es 1 hora, no 2.
 
-`revalidate` se aplica a la ruta completa. Para lugares no curados, el servidor devuelve solo el marco de la página sin pedir datos, de modo que el `revalidate` actúa sobre un marco vacío. La directiva se escribe como literal en el archivo de la ruta **[POR VERIFICAR]** según la versión de Next.js. Eso no cambia el `fetch` del navegador, que sigue en `no-store`.
+Con `cacheComponents: true` (Next.js 16.4.1, ya activo en `next.config.ts`), el export de segmento `export const revalidate` **no es compatible**: produce error. La revalidación de 3600 s se declara con `'use cache'` + `cacheLife`, por ejemplo `cacheLife('hours')` (perfil con `stale: 5 min`, `revalidate: 1 h`, `expire: 1 d`) o un perfil con `revalidate: 3600`. **[VERIFICADO]** `cacheLife` se aplica al ámbito cacheado, no a la ruta entera. El `fetch` del servidor se cachea al ejecutarse dentro de `'use cache'`; sus opciones `next.revalidate`/`next.tags` se sustituyen por `cacheLife`/`cacheTag`. El `fetch` del navegador sigue en `no-store`. Para lugares no curados, el servidor devuelve solo el marco sin pedir datos; con `partialPrefetching: true`, el App Shell se sirve y el resultado se actualiza y cachea en segundo plano. Detalle en `verification-notes.md` §8.
 
 ### 7.5 Si Open-Meteo falla en el servidor
 
 - Durante el build: capturar el error, generar la página **sin datos iniciales** y dejar que el cliente los pida.
-- Durante una regeneración: Next.js debería seguir sirviendo la última versión válida **[POR VERIFICAR]**.
+- Durante una regeneración: Next.js sigue sirviendo la última versión válida; el error no se guarda en caché y la regeneración se reintenta en la siguiente petición. **[VERIFICADO]** Detalle en `verification-notes.md` §8.
 
 ### 7.6 Qué va en el HTML estático y qué se calcula tras montar
 
@@ -583,7 +590,7 @@ Esas tres fichas (Tatacoa, Checua, Lago de Tota) las completa el dueño en el JS
 Bogotá, Guatavita y Villa de Leyva sí aparecen como localidades en Colombia. Se pueden rellenar desde esa respuesta, eligiendo el resultado en Colombia, o escribirlas el dueño. En los dos casos el JSON es el que manda.
 
 - Alimentan: `generateStaticParams`, el sitemap, la metadata y el texto de cada página. No alimentan la redirección de `/`.
-- Revalidación de cada página: 3600 segundos.
+- Revalidación de cada página: 3600 segundos mediante `cacheLife` (perfil `hours` o `revalidate: 3600`); no con `export const revalidate`, incompatible con `cacheComponents`.
 - Generación bajo demanda permitida para slugs fuera de la lista: no se responde 404 a un slug válido no curado.
 - Máximo teórico de regeneraciones: 24 por ciudad por día.
 
@@ -647,18 +654,29 @@ Bogotá, Guatavita y Villa de Leyva sí aparecen como localidades en Colombia. S
 
 ---
 
-## 13. Verificaciones pendientes
+## 13. Estado de las verificaciones
 
-Antes de dar por buenas estas suposiciones, comprobarlas contra respuestas reales o documentación oficial (Context7 en cuanto la conexión esté disponible). Si una suposición resulta falsa, avisar al dueño en vez de improvisar.
+Comprobado contra respuestas reales o documentación oficial. El detalle, las consultas y las respuestas literales están en `verification-notes.md`.
 
-- Existencia de `dew_point_2m`, `relative_humidity_2m`, `wind_gusts_10m` y `precipitation_probability` en `hourly` y `current`.
-- Validez conjunta de `past_days=3` y `forecast_days=16`.
-- Formato y escala de `moon_phase` (si se usa como verificación cruzada).
-- Peso real de la consulta en el contador de llamadas de Open-Meteo.
-- Campos exactos de la respuesta de geocodificación.
-- Nombres de las cabeceras de IP de Vercel.
-- Nombres de funciones de astronomy-engine, refracción y cálculo de la culminación.
-- Nombre exacto, en la versión instalada de TanStack Query, de la opción que fija la hora de obtención del dato inicial.
-- Comportamiento de `revalidate` en la versión de Next.js instalada: forma de declararlo y qué ocurre si una regeneración falla.
-- Necesidad de Suspense al leer `?date=` en componentes de cliente.
-- Coordenadas, altitud y zona horaria de cada ciudad de la sección 9, tomadas de la geocodificación.
+**Verificado en T001 (2026-10-19):**
+
+- **[VERIFICADO]** Existencia de `dew_point_2m`, `relative_humidity_2m`, `wind_gusts_10m` y `precipitation_probability` en `hourly` y `current`; y del resto de variables de §5.1.
+- **[VERIFICADO]** Validez conjunta de `past_days=3` y `forecast_days=16`: 19 días.
+- **[VERIFICADO]** Formato y escala de `moon_phase`: fracción 0–1 de la lunación; solo verificación cruzada.
+- **[VERIFICADO]** Peso real de la consulta: ≈3,12 llamadas para la consulta combinada; ≈2,04 + 1,00 (sin `moon_phase`) o ≈2,17 + 1,00 (con `moon_phase`) para las peticiones separadas.
+- **[VERIFICADO]** Campos exactos de la respuesta de geocodificación.
+- **[VERIFICADO]** Nombres de las cabeceras de IP de Vercel.
+- **[VERIFICADO]** Nombre exacto de la opción de TanStack Query v5: `initialDataUpdatedAt` (milisegundos). El paquete aún no está instalado.
+- **[VERIFICADO]** `revalidate` en Next.js 16.4.1 con `cacheComponents`: no se usa el export de ruta; se usa `'use cache'` + `cacheLife`. Una regeneración fallida sirve la última versión válida y se reintenta.
+- **[VERIFICADO]** `useSearchParams` exige `<Suspense>` con `cacheComponents`.
+
+**Verificado en T002 (2026-10-19):**
+
+- **[VERIFICADO]** Firmas exactas de todas las capacidades de §5.4 en `astronomy-engine@2.1.19`: `MoonPhase`, `Illumination` (`phase_fraction`, `mag`), `Equator` + `Horizon`, `SearchRiseSet`, `SearchAltitude`, `Elongation`, `AngleBetween` (sustituto de la separación angular entre dos cuerpos) y `Observer`.
+- **[VERIFICADO]** La culminación es nativa: `SearchHourAngle(body, observer, 0, dateStart)`. No se usa el plan B del máximo muestreado.
+- **[VERIFICADO]** La refracción no está activa por defecto: la app pasa `"normal"`; `SearchRiseSet` la aplica siempre y `SearchAltitude` la omite por convención.
+
+**Sigue pendiente (fuera de T001 y T002):**
+
+- Coordenadas, altitud (`elevationM`) y zona horaria (`timeZone`) de Desierto de la Tatacoa, Desierto de Checua y Lago de Tota, que entrega el dueño. Campos por ciudad: `slug`, `name`, `latitude`, `longitude`, `elevationM`, `timeZone`, `description` (ver `verification-notes.md`, T002 §15).
+- Textos de «por qué observar aquí» y de las páginas legales `/terminos` y `/privacidad`, que entrega el dueño.
