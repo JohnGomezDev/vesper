@@ -102,6 +102,7 @@ Hosting: **Vercel**. **[CERRADO]**
 
 - Si la hora local es anterior al amanecer de hoy, la noche actual es la que empezó ayer.
 - En cualquier otro caso, la noche actual es la de hoy.
+- Si faltan `sunrise`/`sunset` para las fechas relevantes (sol de medianoche o noche polar), **no se declara noche actual**: se muestra el estado explícito de «sin noche astronómica» y el selector permite navegar por días locales. La fecha por defecto es el día local del lugar. **[CERRADO]**
 
 **Noches disponibles.** Con `past_days=3` y `forecast_days=16` hay 19 días de datos (días −3 a +15 respecto a hoy). Como cada noche necesita el día siguiente, las noches completas son D = −3 a D = +14 (18 noches). **[CERRADO]**
 
@@ -109,7 +110,7 @@ Hosting: **Vercel**. **[CERRADO]**
 
 **Oscuridad.** Se define por la altitud del Sol calculada con astronomy-engine. Los tres niveles son acumulativos (un objeto que vale con el Sol a −6° también vale con el Sol más bajo):
 
-- Sol < −18°: noche astronómica. Exigida para objetos débiles.
+- Sol < −18°: noche astronómica. Exigida para Urano y Neptuno (los objetos débiles).
 - Sol < −12°: incluye el crepúsculo astronómico. Exigida para la Luna y los planetas brillantes.
 - Sol < −6°: incluye el crepúsculo náutico. Permitida solo para Venus y Júpiter.
 
@@ -390,15 +391,15 @@ Tres bloques:
    - Visibilidad, humedad y diferencia temperatura/punto de rocío, viento y ráfagas, probabilidad de precipitación.
    - Las horas fuera del intervalo puesta–amanecer se ven como margen, no como parte de la noche.
    - Si la noche es pasada (D anterior a hoy), la etiqueta **«pronóstico archivado»** es visible.
-   - Resumen: «mejor ventana» entre las ventanas de observación de esa noche.
+   - Resumen: «mejor ventana» entre las ventanas de observación de esa noche. Se elige por clase de nubosidad (menor `nube`), luego por mayor altitud máxima y luego por mayor duración. **[CERRADO]**
    - Información lunar de esa noche: fase (nombre completo e icono), porcentaje de iluminación, salida y puesta, altura durante la noche.
    - Ventanas de observación de la Luna y los planetas (sección 8.5). El Sol no aparece en esa lista.
-3. **Selector de noches.** Fila horizontal desplazable: de −3 a +14. Cada elemento muestra la palabra y el número de la puntuación (8.6) y si hay lluvia probable. Si esa noche no tiene nota, muestra «sin noche astronómica». Tocar una noche cambia la vista sin cambiar de pantalla y actualiza `?date=`.
+3. **Selector de noches.** Fila horizontal desplazable: de −3 a +14. Cada elemento muestra la palabra y el número de la puntuación (8.6), la nubosidad media de las horas válidas de la nota y si hay lluvia probable. Hay lluvia probable cuando el máximo de `precipitation_probability` en esas horas válidas es **≥ 60 %**. Si esa noche no tiene nota, muestra «sin noche astronómica» y no marca lluvia. Tocar una noche cambia la vista sin cambiar de pantalla y actualiza `?date=`. **[CERRADO]**
 
 **Reglas del selector:**
 
 - Se deshabilita avanzar más allá de +14 y retroceder más allá de −3.
-- No se muestra una marca de «tendencia» ni otro aviso de fiabilidad según lo lejana que sea la noche. Open-Meteo no entrega ese dato. El selector muestra la nubosidad de cada noche. **[CERRADO]**
+- No se muestra una marca de «tendencia» ni otro aviso de fiabilidad según lo lejana que sea la noche. Open-Meteo no entrega ese dato. El selector muestra la nubosidad media de las horas válidas de cada noche (las mismas horas que la nota, Sol < −18°). **[CERRADO]**
 - La interfaz indica claramente la **zona horaria del lugar** («horas locales de [lugar]») cuando difiere de la del dispositivo.
 
 ### 8.3 Cálculo de la noche
@@ -451,7 +452,7 @@ Una ventana se muestra como: objeto, hora de inicio, hora de fin, altitud máxim
 4. **Elongación (Mercurio y Venus).** Por debajo de **15°** no hay ventana útil y el texto es «demasiado cerca del Sol». Si hay ventana, indicar «de la mañana» o «de la tarde» según el planeta esté al oeste o al este del Sol.
 5. **Interferencia lunar.**
    - Como objetivo, a la Luna le basta la altitud mínima y su nivel de oscuridad.
-   - La **ventana sin Luna** (oscuridad exigida por el objeto, y Luna bajo el horizonte o con iluminación < 10 %) se muestra destacada para objetos débiles.
+   - La **ventana sin Luna** (oscuridad exigida por el objeto, y Luna bajo el horizonte o con iluminación < 10 %) se muestra destacada para Urano y Neptuno, los dos objetos etiquetados como «requiere óptica». **[CERRADO]**
    - Aviso si **ese** planeta está a menos de **10°** de una Luna con iluminación > 20 %. Aviso fuerte por debajo de **5°**. Es un aviso del objeto, no de la noche. No entra en la puntuación de 8.6.
 6. **Nubosidad.** Cada hora se resume en un solo porcentaje, con las tres capas. La baja pesa más porque tapa; la alta pesa poco porque el cirro aún deja ver:
 
@@ -600,7 +601,7 @@ Bogotá, Guatavita y Villa de Leyva sí aparecen como localidades en Colombia. S
 
 **Casos límite**
 
-- **Latitudes altas / sol de medianoche / noche polar:** `sunrise` y `sunset` pueden faltar. La app no debe romperse: estado explícito («sin noche astronómica este día» o equivalente).
+- **Latitudes altas / sol de medianoche / noche polar:** `sunrise` y `sunset` pueden faltar. La app no debe romperse: estado explícito («sin noche astronómica este día» o equivalente). En ese caso no se declara «noche actual»; la fecha por defecto es el día local del lugar y el selector sigue navegable. **[CERRADO]**
 - **Datos faltantes** en el pronóstico (valores nulos en algunas horas): tratarlos como desconocidos, sin asumir cero.
 - **Último día del pronóstico:** la noche D = +15 no es completa. No se ofrece.
 - **Consulta de madrugada:** «esta noche» es la que empezó el día anterior (sección 4).

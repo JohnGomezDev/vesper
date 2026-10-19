@@ -9,7 +9,7 @@ Combina dos fuentes:
 
 Es un proyecto personal y de portafolio: no es comercial, no tiene dominio propio y la interfaz está en español.
 
-> **Estado:** etapa inicial. La app todavía no está construida y varios detalles pueden cambiar. La especificación funcional y de arquitectura completa vive en [`SPEC.md`](./SPEC.md).
+> **Estado:** etapa inicial. La app todavía no está construida y varios detalles pueden cambiar. La especificación funcional y de arquitectura completa vive en [`docs/specs/001-vesper/SPEC.md`](./docs/specs/001-vesper/SPEC.md).
 
 ## Stack previsto
 
@@ -33,5 +33,8 @@ Abre [http://localhost:3000](http://localhost:3000) en el navegador.
 
 ## Documentación
 
-- [`SPEC.md`](./SPEC.md) — especificación funcional y de arquitectura.
+- [`docs/specs/README.md`](./docs/specs/README.md) — estructura de los paquetes de spec.
+- [`docs/specs/001-vesper/SPEC.md`](./docs/specs/001-vesper/SPEC.md) — especificación funcional y de arquitectura.
+- [`docs/specs/001-vesper/PLAN.md`](./docs/specs/001-vesper/PLAN.md) — fases, dependencias y criterios de salida.
+- [`docs/specs/001-vesper/tasks/README.md`](./docs/specs/001-vesper/tasks/README.md) — índice y orden de las tasks.
 - [`AGENTS.md`](./AGENTS.md) — convenciones de código y reglas para agentes.

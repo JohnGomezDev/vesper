@@ -1,6 +1,12 @@
 # AGENTS.md — Vesper
 
-Coding conventions and rules for AI agents working on Vesper. The functional scope lives in `SPEC.md`; this document does not repeat it. This project is **a single Next.js app**. Topic-specific rules live in `.opencode/skills/` (see the **Skills** section at the end).
+Coding conventions and rules for AI agents working on Vesper. The functional scope lives in `docs/specs/001-vesper/SPEC.md`; this document does not repeat it. This project is **a single Next.js app**. Topic-specific rules live in `.opencode/skills/` (see the **Skills** section at the end).
+
+## Documentation
+
+- Each spec package lives in `docs/specs/NNN-<slug>/` and contains `SPEC.md`, `PLAN.md`, and `tasks/`.
+- The SPEC defines what is built and which decisions are closed. The PLAN defines implementation order and exit gates. Tasks are atomic, verifiable units derived from the plan.
+- Do not create tasks before the plan is approved. Do not leave spec, plan, or task files loose at the repository root.
 
 # Naming Conventions
 
