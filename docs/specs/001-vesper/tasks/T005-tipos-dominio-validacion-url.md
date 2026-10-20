@@ -4,7 +4,7 @@
 - **SPEC:** §4, §6.2, §10, §11
 - **Depende de:** T004
 - **Desbloquea:** T006, T008, T018
-- **Estado:** Pendiente
+- **Estado:** Terminada
 
 ## Objetivo
 
@@ -91,3 +91,41 @@ Un módulo `location` con los tipos base, el redondeo de coordenadas y el parseo
 ## Notas y bloqueos
 
 - La etiqueta no se contrasta con la lista curada ni con geocodificación.
+
+---
+
+## Registro de ejecución y desviaciones (2026-10-20)
+
+**Resultado.** Task ejecutada. Existe el módulo `location` con los tipos base, el redondeo de coordenadas, los validadores de rango y el parseo/construcción de los tres tipos de slug del SPEC §6.2, con pruebas unitarias propias. Todos los criterios de aceptación quedaron verificados.
+
+**Archivos creados.**
+
+- `src/modules/location/types/location.types.ts` — `ICoordinates`, `ILocation` y `TSlugParseResult`.
+- `src/modules/location/utils/coordinates.ts` — `roundCoordinate`, `roundCoordinates`, `isValidLatitude` e `isValidLongitude`.
+- `src/modules/location/utils/slug.ts` — `slugifyLabel`, `buildCuratedSlug`, `buildCoordinatesSlug` y `parseSlug`.
+- `src/modules/location/utils/coordinates.test.ts` — 9 pruebas.
+- `src/modules/location/utils/slug.test.ts` — 19 pruebas.
+
+**Desviaciones y decisiones autorizadas.**
+
+1. **Redondeo decimal robusto en lugar del pseudocódigo literal del paso 2 (autorizado por el dueño).** La fórmula literal `(Math.sign(input) * Math.round(Math.abs(input) * 100)) / 100` no cumple «mitad alejándose de cero» por la representación binaria: produce `1.005 → 1`, `-1.005 → -1` y `-74.085 → -74.08`. Como T007 exige probar exactamente esos valores, se mantuvo la firma y el comportamiento de 2 decimales, pero se normaliza la escala con `toPrecision(15)` antes de `Math.round`. Resultado: `1.005 → 1.01`, `-1.005 → -1.01`, `4.615 → 4.62`, `-74.085 → -74.09`, y `-0` se sigue normalizando a `0`.
+2. **`buildCuratedSlug` normaliza con `slugifyLabel` (autorizado por el dueño).** La task no detallaba el comportamiento. Se devuelve `slugifyLabel(slug)` para cumplir las reglas del SPEC §6.2 (minúsculas, sin tildes, guiones internos y sin `_`), tanto si recibe un nombre como un slug casi normalizado.
+3. **`buildCoordinatesSlug` redondea antes de aplicar `toFixed(2)`.** Se usa `roundCoordinates` para garantizar los 2 decimales y evitar `-0.00`; después se aplica `toFixed(2)`, se conserva el signo negativo y no se añade `+`.
+4. **Límites de rango inclusivos.** `isValidLatitude` acepta `-90` y `90`, e `isValidLongitude` acepta `-180` y `180`, en línea con el SPEC §6.2 y §11. Se rechazan valores fuera del rango, `NaN` e infinitos.
+5. **Sin dependencia de la zona horaria.** Las pruebas y utilidades no usan fechas ni `Intl`; se ejecutaron con `TZ=UTC` y `TZ=America/Bogota` con el mismo resultado.
+
+**Archivos modificados (documentación, según lo pedido).**
+
+- `docs/specs/001-vesper/tasks/README.md` — T005 marcada como «Terminada».
+- `docs/specs/001-vesper/tasks/T005-tipos-dominio-validacion-url.md` — estado y este registro.
+
+No se tocó ningún archivo fuera del alcance de la task.
+
+**Verificación.**
+
+- `pnpm test src/modules/location` — 2 archivos y 28 pruebas pasan.
+- `pnpm test` — 3 archivos y 29 pruebas pasan.
+- `TZ=UTC pnpm test src/modules/location` y `TZ=America/Bogota pnpm test src/modules/location` — 28 pruebas pasan en ambas zonas.
+- `pnpm typecheck` — sin errores.
+- `pnpm lint` — 0 errores; se mantiene el warning preexistente de `prettier.config.mjs`.
+- `pnpm exec prettier --check` sobre los cinco archivos creados — todos conformes.
