@@ -12,8 +12,8 @@ Centralize all query keys per module in a `*.query-keys.ts` file. Use the factor
 ```typescript
 // /src/modules/test/constants/test.query-keys.ts
 export const testKeys = {
-  all: () => ["tests"] as const,
-  lists: () => [...testKeys.all(), "list"] as const,
+  all: () => ['tests'] as const,
+  lists: () => [...testKeys.all(), 'list'] as const,
   detail: (slug: string) => [...testKeys.all(), slug] as const,
 };
 ```

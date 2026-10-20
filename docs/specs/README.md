@@ -37,6 +37,6 @@ docs/
 
 ## Paquetes
 
-| Paquete        | Estado      | Descripción                                                        |
-| -------------- | ----------- | ------------------------------------------------------------------ |
-| `001-vesper`   | En plan     | App completa de clima y observación astronómica.                   |
+| Paquete      | Estado  | Descripción                                      |
+| ------------ | ------- | ------------------------------------------------ |
+| `001-vesper` | En plan | App completa de clima y observación astronómica. |

@@ -150,37 +150,37 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 
 ## Índice
 
-| Task | Fase | Título                                                       | Depende de             | Estado    |
-| ---- | ---- | ------------------------------------------------------------ | ---------------------- | --------- |
-| T001 | F0   | Verificar Open-Meteo, Vercel y el stack de caché             | —                      | Terminada |
-| T002 | F0   | Verificar astronomy-engine y recopilar datos del dueño       | —                      | Terminada |
-| T003 | F1   | Dependencias, scripts y configuración base                   | T001                   | Pendiente |
-| T004 | F1   | Esqueleto base: Provider, layout, base visual y rutas        | T003                   | Pendiente |
-| T005 | F2   | Tipos de dominio y validación de URL                         | T004                   | Pendiente |
-| T006 | F2   | Zona horaria, noches y noche actual                          | T005                   | Pendiente |
-| T007 | F2   | Pruebas de dominio                                           | T006                   | Pendiente |
-| T008 | F3   | Cliente fetch compartido                                     | T004                   | Pendiente |
-| T009 | F3   | Servicios de Open-Meteo y geocodificación                    | T008                   | Pendiente |
-| T010 | F3   | Query keys, hooks, caché y reintentos                        | T009                   | Pendiente |
-| T011 | F3   | Prefetch, datos iniciales y pruebas de datos                 | T010                   | Pendiente |
-| T012 | F4   | Observador, conversión de tiempo y Sol                       | T006                   | Pendiente |
-| T013 | F4   | Luna y planetas                                              | T012                   | Pendiente |
-| T014 | F4   | Muestreo de 10 minutos y pruebas de humo                     | T013                   | Pendiente |
-| T015 | F5   | Nubosidad y fases lunares                                    | T006, T014             | Pendiente |
-| T016 | F5   | Ventanas de observación e interferencia lunar                | T015                   | Pendiente |
-| T017 | F5   | Mejor ventana, puntuación y pruebas                          | T016                   | Pendiente |
-| T018 | F6   | Redirección de `/` por cabeceras de IP                       | T005, T007             | Pendiente |
-| T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales         | T010, T011, T017       | Pendiente |
-| T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres                  | T019                   | Pendiente |
-| T021 | F7   | Bloque «Ahora» y tira horaria                                | T020                   | Pendiente |
-| T022 | F7   | Luna, ventanas y selectores                                  | T021                   | Pendiente |
-| T023 | F7   | Estados, accesibilidad e hidratación                         | T022                   | Pendiente |
-| T024 | F8   | SEO, sitemap, robots y noindex                               | T019                   | Pendiente |
-| T025 | F8   | Páginas legales                                              | T004                   | Pendiente |
-| T026 | F8   | Atribución, not-found y error                                | T004                   | Pendiente |
-| T027 | F9   | Aceptación §12 y comprobaciones de red                       | T023, T024, T025, T026 | Pendiente |
-| T028 | F9   | Casos límite, zonas horarias y contraste astronómico         | T027                   | Pendiente |
-| T029 | F9   | Despliegue en Vercel                                         | T027, T028             | Pendiente |
+| Task | Fase | Título                                                 | Depende de             | Estado    |
+| ---- | ---- | ------------------------------------------------------ | ---------------------- | --------- |
+| T001 | F0   | Verificar Open-Meteo, Vercel y el stack de caché       | —                      | Terminada |
+| T002 | F0   | Verificar astronomy-engine y recopilar datos del dueño | —                      | Terminada |
+| T003 | F1   | Dependencias, scripts y configuración base             | T001                   | Terminada |
+| T004 | F1   | Esqueleto base: Provider, layout, base visual y rutas  | T003                   | Pendiente |
+| T005 | F2   | Tipos de dominio y validación de URL                   | T004                   | Pendiente |
+| T006 | F2   | Zona horaria, noches y noche actual                    | T005                   | Pendiente |
+| T007 | F2   | Pruebas de dominio                                     | T006                   | Pendiente |
+| T008 | F3   | Cliente fetch compartido                               | T004                   | Pendiente |
+| T009 | F3   | Servicios de Open-Meteo y geocodificación              | T008                   | Pendiente |
+| T010 | F3   | Query keys, hooks, caché y reintentos                  | T009                   | Pendiente |
+| T011 | F3   | Prefetch, datos iniciales y pruebas de datos           | T010                   | Pendiente |
+| T012 | F4   | Observador, conversión de tiempo y Sol                 | T006                   | Pendiente |
+| T013 | F4   | Luna y planetas                                        | T012                   | Pendiente |
+| T014 | F4   | Muestreo de 10 minutos y pruebas de humo               | T013                   | Pendiente |
+| T015 | F5   | Nubosidad y fases lunares                              | T006, T014             | Pendiente |
+| T016 | F5   | Ventanas de observación e interferencia lunar          | T015                   | Pendiente |
+| T017 | F5   | Mejor ventana, puntuación y pruebas                    | T016                   | Pendiente |
+| T018 | F6   | Redirección de `/` por cabeceras de IP                 | T005, T007             | Pendiente |
+| T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales   | T010, T011, T017       | Pendiente |
+| T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres            | T019                   | Pendiente |
+| T021 | F7   | Bloque «Ahora» y tira horaria                          | T020                   | Pendiente |
+| T022 | F7   | Luna, ventanas y selectores                            | T021                   | Pendiente |
+| T023 | F7   | Estados, accesibilidad e hidratación                   | T022                   | Pendiente |
+| T024 | F8   | SEO, sitemap, robots y noindex                         | T019                   | Pendiente |
+| T025 | F8   | Páginas legales                                        | T004                   | Pendiente |
+| T026 | F8   | Atribución, not-found y error                          | T004                   | Pendiente |
+| T027 | F9   | Aceptación §12 y comprobaciones de red                 | T023, T024, T025, T026 | Pendiente |
+| T028 | F9   | Casos límite, zonas horarias y contraste astronómico   | T027                   | Pendiente |
+| T029 | F9   | Despliegue en Vercel                                   | T027, T028             | Pendiente |
 
 ## Orden de ejecución
 

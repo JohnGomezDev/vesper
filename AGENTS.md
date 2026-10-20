@@ -86,13 +86,13 @@ Routes are never hardcoded in components. The app has its own routes file:
 ```typescript
 // /src/lib/constants/routes.constants.ts
 export const ROUTES = {
-  home: "/",
+  home: '/',
   clima: {
     detail: (slug: string) => `/clima/${slug}`,
   },
   legal: {
-    terms: "/terminos",
-    privacy: "/privacidad",
+    terms: '/terminos',
+    privacy: '/privacidad',
   },
 } as const;
 ```
@@ -114,37 +114,37 @@ Extends `next/core-web-vitals` + `eslint-config-next/typescript`. The config liv
 
 ```javascript
 // eslint.config.mjs
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/explicit-function-return-type": "error",
-      "@typescript-eslint/consistent-type-imports": "error",
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/naming-convention": [
-        "error",
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'error',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/naming-convention': [
+        'error',
         {
-          selector: "variable",
-          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          selector: 'variable',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
         },
-        { selector: "function", format: ["camelCase", "PascalCase"] },
-        { selector: "parameter", format: ["camelCase"] },
-        { selector: "class", format: ["PascalCase"] },
-        { selector: "interface", format: ["PascalCase"], prefix: ["I"] },
-        { selector: "typeAlias", format: ["PascalCase"], prefix: ["T"] },
+        { selector: 'function', format: ['camelCase', 'PascalCase'] },
+        { selector: 'parameter', format: ['camelCase'] },
+        { selector: 'class', format: ['PascalCase'] },
+        { selector: 'interface', format: ['PascalCase'], prefix: ['I'] },
+        { selector: 'typeAlias', format: ['PascalCase'], prefix: ['T'] },
       ],
-      "react/display-name": "error",
-      "react-hooks/exhaustive-deps": "warn",
+      'react/display-name': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   // Override default ignores of eslint-config-next.
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 ]);
 ```
 
@@ -168,7 +168,7 @@ Tailwind v4, configured in CSS — there is no `tailwind.config`. Theme tokens a
 
 ```css
 /* src/app/globals.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme inline {
   --color-background: var(--background);

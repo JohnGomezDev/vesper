@@ -58,7 +58,7 @@ Un módulo `location` con los tipos base, el redondeo de coordenadas y el parseo
 1. Definir los tipos de `location.types.ts` sin `any`.
 2. Implementar `roundCoordinate`:
    ```ts
-   const value = Math.sign(input) * Math.round(Math.abs(input) * 100) / 100;
+   const value = (Math.sign(input) * Math.round(Math.abs(input) * 100)) / 100;
    return value === 0 ? 0 : value;
    ```
 3. Implementar validadores de rango con comparación estricta.

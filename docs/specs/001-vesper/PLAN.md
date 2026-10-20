@@ -66,18 +66,18 @@ Cada módulo organiza sus `components/`, `hooks/`, `services/`, `types/` y `cons
 
 ## 4. Fases
 
-| Fase | Resultado principal                              | Depende de   | Referencias del SPEC |
-| ---- | ------------------------------------------------ | ------------ | -------------------- |
-| F0   | Suposiciones verificadas y decisiones cerradas   | —            | §5, §6, §7, §13      |
-| F1   | Base del proyecto, dependencias y tooling        | F0           | §3, §11              |
-| F2   | Dominio, slug, fechas y modelo de noche          | F1           | §4, §6.2, §6.3, §10  |
-| F3   | Capa de datos, queries y caché                   | F2           | §5.1–5.3, §7         |
-| F4   | Motor astronómico local                          | F2           | §5.4                 |
-| F5   | Análisis de noche, ventanas y puntuación         | F2, F3, F4   | §4, §8.3–8.6         |
-| F6   | Rutas, ubicación, búsqueda, GPS y ciudades       | F2, F3       | §6, §8.1, §9         |
-| F7   | Pantalla principal completa y estados            | F5, F6       | §8.2, §8.7           |
-| F8   | SEO, legal, privacidad y atribución              | F6, F7       | §9, §11              |
-| F9   | Calidad, aceptación y despliegue                 | F0–F8        | §7.1, §10, §12       |
+| Fase | Resultado principal                            | Depende de | Referencias del SPEC |
+| ---- | ---------------------------------------------- | ---------- | -------------------- |
+| F0   | Suposiciones verificadas y decisiones cerradas | —          | §5, §6, §7, §13      |
+| F1   | Base del proyecto, dependencias y tooling      | F0         | §3, §11              |
+| F2   | Dominio, slug, fechas y modelo de noche        | F1         | §4, §6.2, §6.3, §10  |
+| F3   | Capa de datos, queries y caché                 | F2         | §5.1–5.3, §7         |
+| F4   | Motor astronómico local                        | F2         | §5.4                 |
+| F5   | Análisis de noche, ventanas y puntuación       | F2, F3, F4 | §4, §8.3–8.6         |
+| F6   | Rutas, ubicación, búsqueda, GPS y ciudades     | F2, F3     | §6, §8.1, §9         |
+| F7   | Pantalla principal completa y estados          | F5, F6     | §8.2, §8.7           |
+| F8   | SEO, legal, privacidad y atribución            | F6, F7     | §9, §11              |
+| F9   | Calidad, aceptación y despliegue               | F0–F8      | §7.1, §10, §12       |
 
 ### F0 — Verificación y decisiones
 
@@ -259,22 +259,22 @@ Cada módulo organiza sus `components/`, `hooks/`, `services/`, `types/` y `cons
 
 Decisiones cerradas durante la planificación y ya registradas en el SPEC:
 
-| Tema                            | Decisión                                                                            |
-| ------------------------------- | ----------------------------------------------------------------------------------- |
-| Criterio de “mejor ventana”     | Clase de nubosidad (menor `nube`), luego mayor altitud máxima, luego mayor duración. |
-| Umbral de “lluvia probable”     | Máximo de `precipitation_probability` ≥ 60 % en las horas válidas de la nota.        |
-| Nubosidad del selector de noches | Media de `nube` en las horas válidas de la nota.                                    |
-| Qué cuenta como “objeto débil”  | Urano y Neptuno.                                                                     |
+| Tema                                | Decisión                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Criterio de “mejor ventana”         | Clase de nubosidad (menor `nube`), luego mayor altitud máxima, luego mayor duración.           |
+| Umbral de “lluvia probable”         | Máximo de `precipitation_probability` ≥ 60 % en las horas válidas de la nota.                  |
+| Nubosidad del selector de noches    | Media de `nube` en las horas válidas de la nota.                                               |
+| Qué cuenta como “objeto débil”      | Urano y Neptuno.                                                                               |
 | Noche actual sin `sunrise`/`sunset` | Estado explícito de “sin noche astronómica”, sin noche actual; fecha por defecto el día local. |
 
 Pendientes que dependen de terceros o de verificación:
 
-| Tema                                                          | Estado        | Fase   | Acción                                                               |
-| ------------------------------------------------------------- | ------------- | ------ | -------------------------------------------------------------------- |
+| Tema                                                          | Estado        | Fase   | Acción                                                                |
+| ------------------------------------------------------------- | ------------- | ------ | --------------------------------------------------------------------- |
 | Verificaciones del SPEC §13                                   | Por verificar | F0     | Contrastar con documentación y respuestas reales; actualizar el SPEC. |
-| Textos de `/terminos` y `/privacidad`                         | Abierto       | F8     | Los entrega el dueño. No inventarlos.                                |
-| Textos “por qué observar aquí” de las ciudades                | Abierto       | F6, F8 | Los entrega el dueño. No rellenarlos con contaminación lumínica.     |
-| Coordenadas, altitud y zona horaria de Tatacoa, Checua y Tota | Pendiente     | F0, F6 | Las completa el dueño en el JSON. No aproximarlas ni usar homónimos. |
+| Textos de `/terminos` y `/privacidad`                         | Abierto       | F8     | Los entrega el dueño. No inventarlos.                                 |
+| Textos “por qué observar aquí” de las ciudades                | Abierto       | F6, F8 | Los entrega el dueño. No rellenarlos con contaminación lumínica.      |
+| Coordenadas, altitud y zona horaria de Tatacoa, Checua y Tota | Pendiente     | F0, F6 | Las completa el dueño en el JSON. No aproximarlas ni usar homónimos.  |
 
 Ninguna de estas decisiones se resuelve por cuenta del agente. Si una verificación contradice el SPEC, se detiene la fase afectada y se consulta al dueño.
 

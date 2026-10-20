@@ -68,15 +68,15 @@ Hosting: **Vercel**. **[CERRADO]**
 
 ## 3. Stack y decisiones de arquitectura **[CERRADO]**
 
-| Pieza                            | Decisión                                                                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework                        | Next.js, App Router. Se usa por enrutamiento, metadata y generación estática de ciudades curadas.                                                 |
-| UI                               | React. La app interactiva vive en componentes de cliente.                                                                                         |
-| Caché del servidor               | Data Cache de Next.js: `'use cache'` + `cacheLife` en la función de datos **del servidor**. 3600 segundos.                                        |
-| Caché del navegador              | TanStack Query v5 **[VERIFICADO]**. Solo memoria de la pestaña. No hay persistencia en `localStorage` ni IndexedDB.                                |
-| Cliente HTTP                     | `fetch` nativo. **No axios.**                                                                                                                     |
-| Astronomía                       | astronomy-engine, calculada localmente (sin red).                                                                                                 |
-| Datos de clima y geocodificación | Open-Meteo, plan gratuito, sin API key.                                                                                                           |
+| Pieza                            | Decisión                                                                                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework                        | Next.js, App Router. Se usa por enrutamiento, metadata y generación estática de ciudades curadas.                                                          |
+| UI                               | React. La app interactiva vive en componentes de cliente.                                                                                                  |
+| Caché del servidor               | Data Cache de Next.js: `'use cache'` + `cacheLife` en la función de datos **del servidor**. 3600 segundos.                                                 |
+| Caché del navegador              | TanStack Query v5 **[VERIFICADO]**. Solo memoria de la pestaña. No hay persistencia en `localStorage` ni IndexedDB.                                        |
+| Cliente HTTP                     | `fetch` nativo. **No axios.**                                                                                                                              |
+| Astronomía                       | astronomy-engine, calculada localmente (sin red).                                                                                                          |
+| Datos de clima y geocodificación | Open-Meteo, plan gratuito, sin API key.                                                                                                                    |
 | Hosting                          | Vercel. Debe poder leer las cabeceras de IP del visitante. **No usar exportación estática pura** (`output: 'export'`), porque rompe la caché del servidor. |
 
 ### 3.1 Principio rector de la caché **[CERRADO]**
@@ -215,17 +215,17 @@ Plan gratuito, solo uso no comercial:
 
 **Capacidades requeridas [VERIFICADO]** contra `astronomy-engine@2.1.19` (2026-10-19). Firmas exactas tomadas del `.d.ts` publicado y del README oficial; el detalle está en `verification-notes.md` (T002). `FlexibleDateTime` es un `Date` de JavaScript en UTC.
 
-| Capacidad | Función confirmada |
-| --------- | ------------------ |
-| Fase lunar como ángulo (0 a 360°) | `MoonPhase(date)` |
-| Fracción iluminada (0 a 1) | `Illumination(body, date).phase_fraction` |
+| Capacidad                                                                 | Función confirmada                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fase lunar como ángulo (0 a 360°)                                         | `MoonPhase(date)`                                                                                                                                                                                                           |
+| Fracción iluminada (0 a 1)                                                | `Illumination(body, date).phase_fraction`                                                                                                                                                                                   |
 | Altitud y azimut de Sol, Luna y planetas para un instante y un observador | `Equator(body, date, observer, ofdate, aberration)` y después `Horizon(date, observer, ra, dec, refraction)`. El observador es `Observer(latitude, longitude, height)`, con `height` en metros (la altitud de la ubicación) |
-| Salida y puesta de Sol y Luna | `SearchRiseSet(body, observer, direction, dateStart, limitDays, metersAboveGround?)`. `direction` es `+1` (salida) o `-1` (puesta), no un enum |
-| Cruce del Sol por una altitud dada (crepúsculos) | `SearchAltitude(body, observer, direction, dateStart, limitDays, altitude)`, con `altitude` en `-6`, `-12` o `-18` grados |
-| Elongación de planetas respecto al Sol (Mercurio, Venus) | `Elongation(body, date)` → `elongation` en 0–180° y `visibility` (`"morning"`/`"evening"`; la app traduce a «de la mañana»/«de la tarde») |
-| Magnitud aparente de planetas | `Illumination(body, date).mag` |
-| Separación angular entre dos cuerpos | **No existe función directa cuerpo–cuerpo.** Se usa `AngleBetween(a, b)` con los vectores `Equator(...).vec`. Para la separación Sol–cuerpo existe `AngleFromSun(body, date)` |
-| Culminación (tránsito por el meridiano) | **Nativa:** `SearchHourAngle(body, observer, 0, dateStart)` → `HourAngleEvent` con `time` y `hor` (altitud máxima). No se usa el máximo de la serie muestreada |
+| Salida y puesta de Sol y Luna                                             | `SearchRiseSet(body, observer, direction, dateStart, limitDays, metersAboveGround?)`. `direction` es `+1` (salida) o `-1` (puesta), no un enum                                                                              |
+| Cruce del Sol por una altitud dada (crepúsculos)                          | `SearchAltitude(body, observer, direction, dateStart, limitDays, altitude)`, con `altitude` en `-6`, `-12` o `-18` grados                                                                                                   |
+| Elongación de planetas respecto al Sol (Mercurio, Venus)                  | `Elongation(body, date)` → `elongation` en 0–180° y `visibility` (`"morning"`/`"evening"`; la app traduce a «de la mañana»/«de la tarde»)                                                                                   |
+| Magnitud aparente de planetas                                             | `Illumination(body, date).mag`                                                                                                                                                                                              |
+| Separación angular entre dos cuerpos                                      | **No existe función directa cuerpo–cuerpo.** Se usa `AngleBetween(a, b)` con los vectores `Equator(...).vec`. Para la separación Sol–cuerpo existe `AngleFromSun(body, date)`                                               |
+| Culminación (tránsito por el meridiano)                                   | **Nativa:** `SearchHourAngle(body, observer, 0, dateStart)` → `HourAngleEvent` con `time` y `hor` (altitud máxima). No se usa el máximo de la serie muestreada                                                              |
 
 **Refracción atmosférica.** No está activa por defecto en la librería: la app pasa la cadena `"normal"` a `Horizon` siempre que pide altitud y azimut. `SearchRiseSet` ya la aplica siempre (corrección fija de 34 minutos de arco). `SearchHourAngle` devuelve el `hor` con `"normal"`. `SearchAltitude` (crepúsculos) **no** la aplica, de forma intencionada: la oscuridad de la sección 4 se define por la altitud geométrica del Sol.
 
