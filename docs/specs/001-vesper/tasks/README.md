@@ -158,7 +158,7 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T004 | F1   | Esqueleto base: Provider, layout, base visual y rutas  | T003                   | Terminada |
 | T005 | F2   | Tipos de dominio y validación de URL                   | T004                   | Terminada |
 | T006 | F2   | Zona horaria, noches y noche actual                    | T005                   | Terminada |
-| T007 | F2   | Pruebas de dominio                                     | T006                   | Pendiente |
+| T007 | F2   | Pruebas de dominio                                     | T006                   | Terminada |
 | T008 | F3   | Cliente fetch compartido                               | T004                   | Pendiente |
 | T009 | F3   | Servicios de Open-Meteo y geocodificación              | T008                   | Pendiente |
 | T010 | F3   | Query keys, hooks, caché y reintentos                  | T009                   | Pendiente |

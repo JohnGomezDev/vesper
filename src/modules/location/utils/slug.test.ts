@@ -1,12 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CURATED_SLUGS,
+  INVALID_SLUGS,
+  VALID_SLUG_CASES,
+} from '@/modules/location/utils/__fixtures__/domain-fixtures';
+import {
   buildCoordinatesSlug,
   buildCuratedSlug,
   parseSlug,
   slugifyLabel,
 } from '@/modules/location/utils/slug';
 
-const CURATED_SLUGS = new Set(['bogota', 'ushuaia', 'villa-de-leyva']);
+describe('parseSlug valid matrix', () => {
+  it.each(VALID_SLUG_CASES)('parses $slug', ({ slug, expected }) => {
+    expect(parseSlug(slug, CURATED_SLUGS)).toEqual(expected);
+  });
+});
+
+describe('parseSlug invalid matrix', () => {
+  it.each(INVALID_SLUGS)('rejects %s', (slug) => {
+    expect(parseSlug(slug, CURATED_SLUGS)).toEqual({ kind: 'invalid' });
+  });
+});
 
 describe('slugifyLabel', () => {
   it('lowercases and replaces spaces with hyphens', () => {
@@ -127,25 +142,7 @@ describe('parseSlug', () => {
   });
 
   it('returns invalid for malformed or out-of-range slugs', () => {
-    const invalidSlugs = [
-      '',
-      'zipaquira',
-      '-74.08',
-      '4.6_-74.08',
-      '4.610_-74.08',
-      '4_-74.08',
-      '.61_-74.08',
-      '+4.61_-74.08',
-      '4.61_+74.08',
-      '91.00_0.00',
-      '-91.00_0.00',
-      '0.00_180.01',
-      '0.00_-180.01',
-      '4.61_-74.08_',
-      '4.61_-74.08_extra',
-    ];
-
-    for (const slug of invalidSlugs) {
+    for (const slug of INVALID_SLUGS) {
       expect(parseSlug(slug, CURATED_SLUGS)).toEqual({ kind: 'invalid' });
     }
   });

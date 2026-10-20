@@ -1,10 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import { COORDINATE_ROUNDING_CASES } from '@/modules/location/utils/__fixtures__/domain-fixtures';
 import {
   isValidLatitude,
   isValidLongitude,
   roundCoordinate,
   roundCoordinates,
 } from '@/modules/location/utils/coordinates';
+
+describe('roundCoordinate edge-case matrix', () => {
+  it.each(COORDINATE_ROUNDING_CASES)('rounds $input to $expected', ({ input, expected }) => {
+    const rounded = roundCoordinate(input);
+
+    expect(rounded).toBe(expected);
+    expect(Object.is(rounded, expected)).toBe(true);
+  });
+});
 
 describe('roundCoordinate', () => {
   it('rounds to two decimals', () => {

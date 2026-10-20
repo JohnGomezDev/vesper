@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ADD_DAYS_CASES,
+  DATE_PARAM_CASES,
+  DOMAIN_DATES,
+  LOCAL_DATE_TIME_CASES,
+  TIME_ZONES,
+  utc,
+} from '@/modules/location/utils/__fixtures__/domain-fixtures';
+import {
   addDays,
   formatLocalDate,
   formatLocalTime,
@@ -11,14 +19,19 @@ import {
   parseLocalDateTime,
 } from '@/modules/location/utils/datetime';
 
-const BOGOTA = 'America/Bogota';
-const NEW_YORK = 'America/New_York';
-const SANTIAGO = 'America/Santiago';
-const TOKYO = 'Asia/Tokyo';
+const BOGOTA = TIME_ZONES.bogota;
+const NEW_YORK = TIME_ZONES.newYork;
+const SANTIAGO = TIME_ZONES.santiago;
+const TOKYO = TIME_ZONES.tokyo;
 
-function utc(year: number, month: number, day: number, hour = 0, minute = 0): number {
-  return Date.UTC(year, month - 1, day, hour, minute);
-}
+describe('parseLocalDateTime matrix', () => {
+  it.each(LOCAL_DATE_TIME_CASES)(
+    'converts $localIso in $timeZone',
+    ({ localIso, timeZone, expectedMs }) => {
+      expect(parseLocalDateTime(localIso, timeZone)).toBe(expectedMs);
+    },
+  );
+});
 
 describe('parseLocalDateTime', () => {
   it('converts a Bogota wall time to UTC (fixed offset -05:00)', () => {
@@ -104,7 +117,7 @@ describe('getLocalMidnightMs', () => {
   });
 
   it('advances to the first existing instant when local midnight is skipped', () => {
-    expect(getLocalMidnightMs('2026-09-06', SANTIAGO)).toBe(utc(2026, 9, 6, 4, 0));
+    expect(getLocalMidnightMs(DOMAIN_DATES.santiagoDstStart, SANTIAGO)).toBe(utc(2026, 9, 6, 4, 0));
   });
 
   it('rejects an invalid date', () => {
@@ -134,6 +147,12 @@ describe('addDays', () => {
   it('rejects invalid dates and non-integer deltas', () => {
     expect(() => addDays('2026-02-30', 1)).toThrow(RangeError);
     expect(() => addDays('2026-10-19', 1.5)).toThrow(RangeError);
+  });
+});
+
+describe('addDays matrix', () => {
+  it.each(ADD_DAYS_CASES)('$date + $delta = $expected', ({ date, delta, expected }) => {
+    expect(addDays(date, delta)).toBe(expected);
   });
 });
 
@@ -190,8 +209,20 @@ describe('getNightDateRange', () => {
   });
 });
 
+describe('parseDateParam matrix', () => {
+  it.each(DATE_PARAM_CASES)('parses $value', ({ value, expected }) => {
+    expect(parseDateParam(value, DOMAIN_DATES.dateParamToday)).toEqual(expected);
+  });
+
+  it('does not offer the incomplete night D = +15', () => {
+    const date = addDays(DOMAIN_DATES.dateParamToday, 15);
+
+    expect(parseDateParam(date, DOMAIN_DATES.dateParamToday)).toEqual({ kind: 'out-of-range' });
+  });
+});
+
 describe('parseDateParam', () => {
-  const TODAY = '2026-10-19';
+  const TODAY = DOMAIN_DATES.dateParamToday;
 
   it('returns missing only when the parameter is absent', () => {
     expect(parseDateParam(null, TODAY)).toEqual({ kind: 'missing' });
