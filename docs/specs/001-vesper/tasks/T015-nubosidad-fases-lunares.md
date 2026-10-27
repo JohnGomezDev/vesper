@@ -4,7 +4,7 @@
 - **SPEC:** §8.4, §8.5
 - **Depende de:** T006, T014
 - **Desbloquea:** T016
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-27)
 
 ## Objetivo
 
@@ -76,3 +76,33 @@ Convertir las tres capas de nubosidad en un valor y una clase, y nombrar las och
 ## Notas y bloqueos
 
 - No se calcula ni se muestra el ángulo del limbo brillante ni se rota el icono.
+
+---
+
+## Registro de ejecución y desviaciones (2026-10-27)
+
+**Resultado.** Task ejecutada. `night` expone la nubosidad ponderada y su clase, las ocho fases lunares con nombre en español y el identificador de icono. Las pruebas cubren todos los cortes de nubosidad y los bordes de 22,5° de cada fase.
+
+**Archivos creados y modificados.**
+
+- `src/modules/night/types/night.types.ts` — ampliado con `TCloudClass`, `TMoonPhase` y `TMoonIconKey`.
+- `src/modules/night/utils/cloud.ts` — `computeCloudCover`, `classifyCloudCover`.
+- `src/modules/night/constants/moon-phase.constants.ts` — `MOON_PHASE_LABELS_ES`, `MOON_PHASE_RANGES`.
+- `src/modules/night/utils/moon-phase.ts` — `getMoonPhaseName`, `getMoonPhaseIconKey`.
+- `src/modules/night/utils/cloud.test.ts` — 14 pruebas.
+- `src/modules/night/utils/moon-phase.test.ts` — 24 pruebas.
+
+**Decisiones y desviaciones.**
+
+1. **Redondeo de nubosidad a un decimal (autorizado por el dueño).** La task se contradecía: el alcance pedía «redondeo al porcentaje» y el criterio exige `computeCloudCover(11, 0, 0) === 5.5`. Redondear al entero daría 6. Se acordó redondear a un decimal: 5.5 se conserva y se elimina el ruido de coma flotante. Queda documentado en el JSDoc de `computeCloudCover`.
+2. **Forma de `MOON_PHASE_RANGES` no definida en la task.** Se implementó como tabla de tramos semiabiertos `{ phase, startDeg, endDeg }`. La luna nueva aparece dos veces, `[0, 22.5)` y `[337.5, 360)`, para representar el cruce por 0° sin lógica especial en el consumidor. Los tramos cubren `[0, 360)` sin huecos ni solapes.
+3. **Fallback inalcanzable.** `getMoonPhaseName` devuelve `new-moon` al final del recorrido como salvaguarda de tipos; la tabla cubre todo el círculo. No se usa `as` ni una aserción no nula.
+4. **La fase no se evalúa a medianoche aquí.** La task asigna al consumidor calcular el ángulo a la medianoche local; estas utilidades solo nombran el ángulo recibido. La evaluación a medianoche ya vive en `getMoonInfo` (T013).
+5. **Icono como identidad.** `getMoonPhaseIconKey` devuelve la propia fase, tal como ordena el paso 5, para que T022 lo sustituya por el dibujo convencional.
+
+**Verificación.**
+
+- `pnpm test src/modules/night` — 6 archivos y 150 pruebas pasan (38 de esta task).
+- Cortes de nube comprobados: 10/20/30/40 y sus inmediatamente superiores. Bordes de fase comprobados: 22,49/22,5, 67,49/67,5, 112,49/112,5, 157,49/157,5, 202,49/202,5, 247,49/247,5, 292,49/292,5 y 337,49/337,5.
+- Ángulos negativos y mayores de 360° normalizados correctamente.
+- `pnpm test` — 21 archivos y 351 pruebas pasan; `pnpm typecheck`, `pnpm lint` y `pnpm build` correctos (se mantiene el warning preexistente de `prettier.config.mjs`).

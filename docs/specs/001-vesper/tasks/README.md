@@ -168,9 +168,9 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T012 | F4   | Observador, conversión de tiempo y Sol                 | T006                   | Terminada |
 | T013 | F4   | Luna y planetas                                        | T012                   | Terminada |
 | T014 | F4   | Muestreo de 10 minutos y pruebas de humo               | T013                   | Terminada |
-| T015 | F5   | Nubosidad y fases lunares                              | T006, T014             | Pendiente |
-| T016 | F5   | Ventanas de observación e interferencia lunar          | T015                   | Pendiente |
-| T017 | F5   | Mejor ventana, puntuación y pruebas                    | T016                   | Pendiente |
+| T015 | F5   | Nubosidad y fases lunares                              | T006, T014             | Terminada |
+| T016 | F5   | Ventanas de observación e interferencia lunar          | T015                   | Terminada |
+| T017 | F5   | Mejor ventana, puntuación y pruebas                    | T016                   | Terminada |
 | T018 | F6   | Redirección de `/` por cabeceras de IP                 | T005, T007             | Pendiente |
 | T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales   | T010, T011, T017       | Pendiente |
 | T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres            | T019                   | Pendiente |

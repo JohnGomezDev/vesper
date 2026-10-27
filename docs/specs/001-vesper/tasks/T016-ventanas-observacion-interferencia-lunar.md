@@ -4,7 +4,7 @@
 - **SPEC:** §4, §8.5
 - **Depende de:** T015
 - **Desbloquea:** T017
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-27)
 
 ## Objetivo
 
@@ -80,3 +80,33 @@ Calcular las ventanas continuas en las que cada objeto cumple todos los filtros.
 ## Notas y bloqueos
 
 - El umbral de altitud no cambia la petición de datos: solo recalcula en local.
+
+---
+
+## Registro de ejecución y desviaciones (2026-10-27)
+
+**Resultado.** Task ejecutada. `night` expone `computeObservationWindows` con los filtros completos, `IObservationWindow`, `computeMoonInterferenceNotices` e `IMoonInterferenceNotice`. El Sol nunca genera ventana y las ventanas se agrupan tolerando un hueco aislado de una muestra.
+
+**Archivos creados y modificados.**
+
+- `src/modules/night/types/night.types.ts` — ampliado con `TBrightnessLabel`, `TRequiredDarkness`, `IObservationWindow` e `IMoonInterferenceNotice`.
+- `src/modules/night/constants/object-filters.constants.ts` — `OBJECT_FILTERS`, `WINDOW_OBJECT_IDS` y umbrales de elongación e interferencia lunar.
+- `src/modules/night/utils/windows.ts` — `computeObservationWindows`, `computeMoonInterferenceNotices`.
+- `src/modules/night/utils/windows.test.ts` — 22 pruebas.
+
+**Decisiones y desviaciones.**
+
+1. **Entrada ampliada con `elongationByObject` (autorizado por el dueño).** La firma de la task no permitía cumplir el filtro de elongación ≥15° de Mercurio y Venus: `INightSample` solo contiene posiciones. Se añadió el parámetro obligatorio `elongationByObject(objectId, instantMs) => number | null`. `null` o un valor menor que 15° deja al objeto sin ventana. Es la única ampliación de la firma.
+2. **`moonFree` solo para Urano y Neptuno (autorizado).** Para el resto de objetos siempre es `false`; así se cumple el criterio de que solo esos dos pueden tenerlo con destacado. Se marca cuando la iluminación lunar es menor que 10 % o cuando la Luna está bajo el horizonte en todas las muestras válidas de la ventana.
+3. **Etiqueta de brillo estática (autorizado).** El mapa usa `naked-eye` para Luna, Mercurio, Venus, Marte, Júpiter y Saturno, y `telescope` para Urano y Neptuno. No se deriva de la magnitud aparente como describe SPEC §8.5.3 porque la task pide un mapa constante y la entrada no recibe magnitudes. Queda pendiente si el producto necesita esa precisión.
+4. **Culminación aproximada.** `INightSample` no lleva la culminación nativa de `SearchHourAngle`; T013 la expone en `IPlanetInfo`, que no forma parte de la serie. Se usa `findCulmination` de T014 sobre las muestras válidas y se marca `culminationApproximate: true` siempre. La nota de T014 sobre rellenar un valor nativo `null` no aplica porque ese valor no viaja en la entrada.
+5. **Peor nubosidad del intervalo.** Se calcula sobre todas las muestras entre el inicio y el fin de la ventana, incluido el hueco aislado tolerado, porque la task pide la peor clase «dentro del intervalo». `unknown` solo gana si ninguna muestra del intervalo tiene clase conocida.
+6. **Nubosidad `unknown` no excluye.** Solo `poor` queda fuera de las ventanas (SPEC §8.5.6). Una hora desconocida puede entrar y se refleja en `worstCloudClass`.
+7. **Avisos sin filtro de horizonte.** `computeMoonInterferenceNotices` usa la separación mínima de toda la serie, tal como pide la task. No se condiciona a que la Luna esté sobre el horizonte; T022 puede decidir ocultar el aviso en ese caso. La separación usa `getAngularSeparation`, la ley esférica de cosenos sobre coordenadas horizontales que T013 dejó documentada.
+8. **Umbrales de oscuridad estrictos.** Se exige `Sol < −6`, `< −12` o `< −18`; un Sol exactamente en el umbral no pasa.
+
+**Verificación.**
+
+- `pnpm test src/modules/night` — 6 archivos y 150 pruebas pasan (22 de esta task).
+- Criterios cubiertos: Luna y siete planetas con ventana, Sol ausente; Urano/Neptuno a −18°, Venus/Júpiter a −6°; hueco aislado que no parte y dos seguidos que sí; hora `poor` fuera de toda ventana; Mercurio/Venus sin elongación suficiente sin ventana; `moonFree` solo en Urano y Neptuno; aviso normal a 7° y fuerte a 2°.
+- `pnpm test` — 21 archivos y 351 pruebas pasan; `pnpm typecheck`, `pnpm lint` y `pnpm build` correctos (se mantiene el warning preexistente de `prettier.config.mjs`).
