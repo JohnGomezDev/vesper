@@ -4,7 +4,7 @@
 - **SPEC:** §5.4, §8.4, §8.5
 - **Depende de:** T012
 - **Desbloquea:** T014
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-27)
 
 ## Objetivo
 
@@ -60,10 +60,10 @@ Calcular la Luna y los planetas con astronomy-engine como única fuente.
 
 ## Criterios de aceptación
 
-- [ ] La Luna no usa `moon_phase` de Open-Meteo.
-- [ ] `getMoonPhase` devuelve ángulo en `[0, 360)` e iluminación en `[0, 1]`.
-- [ ] Mercurio y Venus devuelven elongación; el resto `null`.
-- [ ] La culminación queda marcada como nativa o aproximada.
+- [x] La Luna no usa `moon_phase` de Open-Meteo.
+- [x] `getMoonPhase` devuelve ángulo en `[0, 360)` e iluminación en `[0, 1]`.
+- [x] Mercurio y Venus devuelven elongación; el resto `null`.
+- [x] La culminación queda marcada como nativa o aproximada.
 
 ## Verificación
 
@@ -73,3 +73,34 @@ Calcular la Luna y los planetas con astronomy-engine como única fuente.
 ## Notas y bloqueos
 
 - La altitud de la Luna se calcula con la `elevation` del pronóstico; si es `null`, se usa `0` y se anota.
+
+---
+
+## Registro de ejecución (2026-10-27)
+
+**Resultado.** Task ejecutada. `astronomy` expone la fase e iluminación lunar, la posición y las horas de salida y puesta de la Luna, y la posición, magnitud, elongación, separación lunar y culminación nativa de los siete planetas. La Luna sale solo de astronomy-engine; no se importa `moon_phase` de Open-Meteo.
+
+**Archivos modificados y creados.**
+
+- `src/modules/astronomy/types/astronomy.types.ts` — ampliado con `IMoonPhase`, `IMoonInfo`, `TPlanetId` e `IPlanetInfo`.
+- `src/modules/astronomy/services/moon.service.ts` — `getMoonPhase`, `getMoonPosition`, `getMoonInfo`.
+- `src/modules/astronomy/services/planets.service.ts` — `getPlanetPosition`, `getAngularSeparation`, `getPlanetInfo`.
+- `src/modules/astronomy/services/moon.service.test.ts` — 6 pruebas.
+- `src/modules/astronomy/services/planets.service.test.ts` — 16 pruebas.
+
+**Decisiones y desviaciones.**
+
+1. **Posición de la Luna a medianoche local (autorizado).** `getMoonInfo` evalúa fase y posición en la medianoche local de `date`, coherente con SPEC §8.4; salida y puesta se buscan en esa fecha local y pueden ser `null`.
+2. **Helpers de solo posición (autorizado).** Se exportan `getMoonPosition` y `getPlanetPosition` desde los servicios ya listados para que T014 muestree sin repetir búsquedas de salida, puesta y culminación. No son símbolos previstos en la lista de la task, pero no añaden archivos.
+3. **Separación Luna–planeta y `getAngularSeparation` no son idénticas cerca del horizonte.** `separationFromMoonDeg` se calcula con `AngleBetween` sobre los vectores de `Equator`, como confirmó T002 y exige SPEC §5.4. La firma declarada de `getAngularSeparation` recibe `IHorizontalPosition`, no vectores, así que aplica la ley esférica de cosenos sobre esas mismas coordenadas. Con refracción y cuerpos bajos ambos valores pueden diferir algunas décimas de grado (en el instante de prueba, 158,12° frente a 158,83°). T016 debe usar `getAngularSeparation` solo si acepta esa diferencia o pedir la ampliación de la firma si necesita el valor ecuatorial exacto. No se cambió la firma sin autorización.
+4. **Separación Sol–planeta (autorizado).** No se añadió campo a `IPlanetInfo`; la separación respecto al Sol queda disponible con `getAngularSeparation` o con `Elongation` cuando T016 lo necesite.
+5. **Culminación nativa.** `SearchHourAngle(body, observer, 0, instant)` devuelve la siguiente culminación desde el instante pedido y `culminationApproximate: false`. Puede caer en el día UTC siguiente; T016 debe interpretarla dentro de la noche. El respaldo muestreado de T014 solo aplica si el valor nativo fuera `null`.
+6. **Normalización defensiva.** `getMoonPhase` normaliza el ángulo a `[0, 360)`; la iluminación se devuelve tal como la entrega `Illumination(...).phase_fraction`, sin sustituirla ni redondearla.
+
+**Verificación.**
+
+- `pnpm test src/modules/astronomy` — 5 archivos y 42 pruebas pasan (22 de esta task).
+- Luna llena conocida del 2026-10-25: `getMoonPhase` devuelve 179,99° y 0,998 de iluminación en 2026-10-26T04:11Z.
+- Contraste con el USNO (AA) para Bogotá, 2026-10-19: `curphase` «Waxing Gibbous», salida de la Luna 12:55 y puesta 00:16 locales. La app devuelve 12:55 y 00:15. La iluminación de la app a medianoche local es 0,552; el 60 % del USNO corresponde a otro instante del día (la librería da 0,603 a las 18:00Z), no a una discrepancia.
+- `pnpm test` — 226 pruebas pasan; `pnpm typecheck`, `pnpm lint` y `pnpm build` correctos.
+- Sin red en el módulo.

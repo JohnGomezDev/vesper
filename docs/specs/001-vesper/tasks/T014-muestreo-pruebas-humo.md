@@ -4,7 +4,7 @@
 - **SPEC:** §5.4, §8.5
 - **Depende de:** T013
 - **Desbloquea:** T015, T016
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-27)
 
 ## Objetivo
 
@@ -57,10 +57,10 @@ Un generador de muestras cada 10 minutos a lo largo de la tira visible, con util
 
 ## Criterios de aceptación
 
-- [ ] Una tira de 10 horas produce 61 muestras.
-- [ ] El muestreo no se recalcula dos veces para el mismo rango dentro del mismo cálculo.
-- [ ] `findCulmination` marca siempre `approximate: true`.
-- [ ] No hay red.
+- [x] Una tira de 10 horas produce 61 muestras.
+- [x] El muestreo no se recalcula dos veces para el mismo rango dentro del mismo cálculo.
+- [x] `findCulmination` marca siempre `approximate: true`.
+- [x] No hay red.
 
 ## Verificación
 
@@ -70,3 +70,36 @@ Un generador de muestras cada 10 minutos a lo largo de la tira visible, con util
 ## Notas y bloqueos
 
 - El muestreo se calcula solo cuando cambian observador, noche o umbral; nunca en cada render.
+
+---
+
+## Registro de ejecución (2026-10-27)
+
+**Resultado.** Task ejecutada. El módulo `astronomy` expone `SAMPLE_STEP_MS`, `INightSample`, `sampleNight` y las utilidades de serie `findMaxAltitude`/`findCulmination`. Una tira de 10 horas produce 61 muestras con el Sol, la Luna y los siete planetas calculados una sola vez por instante.
+
+**Archivos creados y modificados.**
+
+- `src/modules/astronomy/constants/sampling.constants.ts` — `SAMPLE_STEP_MS = 600000`.
+- `src/modules/astronomy/types/astronomy.types.ts` — ampliado con `INightSample`.
+- `src/modules/astronomy/services/sampling.service.ts` — `sampleNight`.
+- `src/modules/astronomy/utils/series.ts` — `findMaxAltitude`, `findCulmination`.
+- `src/modules/astronomy/services/sampling.service.test.ts` — 5 pruebas.
+- `src/modules/astronomy/utils/series.test.ts` — 5 pruebas.
+
+**Decisiones y desviaciones.**
+
+1. **Relleno de culminación aplazado a T016 (autorizado).** En F4 no existen ventanas ni un tipo de ventana. `findCulmination` queda implementado y documentado para que T016 rellene `culminationMs` cuando el valor nativo sea `null`. No se inventó un tipo de ventana ni se añadió un helper fuera de alcance.
+2. **Rango inválido lanza `RangeError`.** La task no define `endMs < startMs` ni valores no finitos; se tratan como error de programación, igual que las utilidades de fecha de T006.
+3. **Extremo no alineado con la rejilla.** Si `endMs` no cae en la rejilla, la última muestra es la anterior a `endMs`, manteniendo la fórmula `floor((endMs − startMs) / SAMPLE_STEP_MS) + 1`. Está documentado en el servicio y cubierto por prueba.
+4. **Una sola pasada por instante.** `sampleNight` calcula Sol, Luna y los siete planetas una vez por instante; no se recalcula el mismo rango dentro de la llamada.
+5. **Empates.** `findMaxAltitude` conserva el primer instante con la altitud máxima, tal como pide el paso 6.
+6. **Dependencia de T013 (autorizada).** Para no repetir búsquedas caras, el muestreo usa `getSunPosition`, `getMoonPosition` y `getPlanetPosition`; los dos últimos se exportaron en T013 con autorización. No se usan `getMoonInfo`/`getPlanetInfo`, que harían varias búsquedas por muestra.
+7. **Rendimiento medido.** La tira de 61 muestras × 9 cuerpos tarda 8–29 ms en la máquina de desarrollo. La prueba incluye una guarda de 500 ms para detectar regresiones patológicas sin volverse frágil.
+
+**Verificación.**
+
+- `pnpm test src/modules/astronomy` — 5 archivos y 42 pruebas pasan (10 de esta task).
+- Tira de 10 h: 61 muestras; primer instante = `startMs`; último = `endMs` cuando cae en la rejilla.
+- `pnpm test` — 16 archivos y 226 pruebas pasan.
+- `pnpm typecheck` sin errores; `pnpm lint` con 0 errores (se mantiene el warning preexistente de `prettier.config.mjs`); `pnpm build` correcto.
+- Sin red en `src/modules/astronomy`.

@@ -165,9 +165,9 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T009 | F3   | Servicios de Open-Meteo y geocodificación              | T008                   | Terminada |
 | T010 | F3   | Query keys, hooks, caché y reintentos                  | T009                   | Terminada |
 | T011 | F3   | Prefetch, datos iniciales y pruebas de datos           | T010                   | Terminada |
-| T012 | F4   | Observador, conversión de tiempo y Sol                 | T006                   | Pendiente |
-| T013 | F4   | Luna y planetas                                        | T012                   | Pendiente |
-| T014 | F4   | Muestreo de 10 minutos y pruebas de humo               | T013                   | Pendiente |
+| T012 | F4   | Observador, conversión de tiempo y Sol                 | T006                   | Terminada |
+| T013 | F4   | Luna y planetas                                        | T012                   | Terminada |
+| T014 | F4   | Muestreo de 10 minutos y pruebas de humo               | T013                   | Terminada |
 | T015 | F5   | Nubosidad y fases lunares                              | T006, T014             | Pendiente |
 | T016 | F5   | Ventanas de observación e interferencia lunar          | T015                   | Pendiente |
 | T017 | F5   | Mejor ventana, puntuación y pruebas                    | T016                   | Pendiente |
