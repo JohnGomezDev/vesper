@@ -25,16 +25,18 @@ src/
 ├── lib/
 │   ├── api/api-client.ts
 │   ├── providers/Providers.tsx
-│   └── constants/routes.constants.ts
+│   ├── constants/routes.constants.ts
+│   └── utils/validation.ts
 └── modules/
     ├── location/  { components, constants, hooks, services, types, utils }
-    ├── weather/   { components, constants, hooks, services, types }
+    ├── weather/   { components, constants, hooks, services, types, utils }
     ├── astronomy/ { components, services, types, utils }
     ├── night/     { components, constants, types, utils }
     └── legal/     { components }
 ```
 
 - Carpetas `utils/` y `constant/`: helpers puros y constantes. Los nombres de archivo son kebab-case.
+- Los `services/` solo orquestan la petición (llaman al cliente, aplican la guarda y lanzan el error). Constructores de URL, guardas de respuesta, normalización de parámetros y demás funciones auxiliares viven en `utils/`, nunca dentro del servicio.
 - Sin archivos `index.ts` de barril: se importa siempre desde el archivo exacto.
 - Cada módulo declara sus propios `*.query-keys.ts`; nunca se comparten claves entre módulos.
 - Las pruebas viven junto a la unidad que prueban, con sufijo `*.test.ts`.
@@ -98,7 +100,7 @@ export interface IFetchOptions {
 export function fetchOpenMeteo<T>(url: string, options: IFetchOptions): Promise<T>;
 ```
 
-- `cacheMode: 'server'` añade `next: { revalidate: 3600 }`.
+- `cacheMode: 'server'` no añade opciones de caché de `fetch`: la caché la declara el wrapper `'use cache'` + `cacheLife` (SPEC §7.2, corrección de T001).
 - `cacheMode: 'client'` añade `cache: 'no-store'` y nunca `revalidate`.
 - Un status no `ok` lanza `ApiError` con el cuerpo de Open-Meteo.
 
@@ -159,10 +161,10 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T005 | F2   | Tipos de dominio y validación de URL                   | T004                   | Terminada |
 | T006 | F2   | Zona horaria, noches y noche actual                    | T005                   | Terminada |
 | T007 | F2   | Pruebas de dominio                                     | T006                   | Terminada |
-| T008 | F3   | Cliente fetch compartido                               | T004                   | Pendiente |
-| T009 | F3   | Servicios de Open-Meteo y geocodificación              | T008                   | Pendiente |
-| T010 | F3   | Query keys, hooks, caché y reintentos                  | T009                   | Pendiente |
-| T011 | F3   | Prefetch, datos iniciales y pruebas de datos           | T010                   | Pendiente |
+| T008 | F3   | Cliente fetch compartido                               | T004                   | Terminada |
+| T009 | F3   | Servicios de Open-Meteo y geocodificación              | T008                   | Terminada |
+| T010 | F3   | Query keys, hooks, caché y reintentos                  | T009                   | Terminada |
+| T011 | F3   | Prefetch, datos iniciales y pruebas de datos           | T010                   | Terminada |
 | T012 | F4   | Observador, conversión de tiempo y Sol                 | T006                   | Pendiente |
 | T013 | F4   | Luna y planetas                                        | T012                   | Pendiente |
 | T014 | F4   | Muestreo de 10 minutos y pruebas de humo               | T013                   | Pendiente |

@@ -4,7 +4,7 @@
 - **SPEC:** §5.1, §5.2
 - **Depende de:** T008
 - **Desbloquea:** T010, T019
-- **Estado:** Pendiente
+- **Estado:** Terminada
 
 ## Objetivo
 
@@ -67,11 +67,11 @@ Implementar los tres servicios de datos con sus tipos, guardas y utilidades de i
 
 ## Criterios de aceptación
 
-- [ ] La URL de pronóstico contiene `past_days=3` y `forecast_days=16`.
-- [ ] Ninguna URL contiene `elevation`.
-- [ ] `fetchCurrent` no pide variables `hourly`.
-- [ ] `searchLocations` con 2 caracteres se rechaza antes de llamar (la UI lo garantiza; el servicio acepta solo `query.trim().length >= 3` y lanza error de programación si no).
-- [ ] Una variable ausente produce `null`, no `0`.
+- [x] La URL de pronóstico contiene `past_days=3` y `forecast_days=16`.
+- [x] Ninguna URL contiene `elevation`.
+- [x] `fetchCurrent` no pide variables `hourly`.
+- [x] `searchLocations` con 2 caracteres se rechaza antes de llamar (la UI lo garantiza; el servicio acepta solo `query.trim().length >= 3` y lanza error de programación si no).
+- [x] Una variable ausente produce `null`, no `0`.
 
 ## Verificación
 
@@ -81,3 +81,50 @@ Implementar los tres servicios de datos con sus tipos, guardas y utilidades de i
 ## Notas y bloqueos
 
 - Si T001 detecta que una variable no existe, se ajusta el SPEC y esta task antes de continuar.
+
+---
+
+## Registro de ejecución y desviaciones (2026-10-27)
+
+**Resultado.** Task ejecutada. `weather` expone `fetchForecast`, `fetchCurrent`, `indexHourly` y `getDailySun`; `location` expone `searchLocations`. Las respuestas se validan con guardas manuales, sin Zod, y las coordenadas se redondean a 2 decimales con la utilidad de T005. La URL de pronóstico lleva `past_days=3`, `forecast_days=16`, `timezone=auto`, las 13 variables horarias y `daily=sunrise,sunset`; ninguna URL envía `elevation`. La consulta real devolvió `elevation: 2586`, `timezone: America/Bogota`, 19 días y 456 filas horarias.
+
+**Archivos creados.**
+
+- `src/modules/weather/types/weather.types.ts` — `IHourlyData`, `IDailyData`, `IForecastResponse`, `ICurrentResponse`, `IHourlyRow` e `IInitialForecast`; reexporta `TDailySun`.
+- `src/modules/weather/utils/forecast.ts` — variables horarias/diarias, `buildForecastUrl` e `isForecastResponse` (con sus guardas internas).
+- `src/modules/weather/utils/current.ts` — variables `current`, `buildCurrentUrl`, `isCurrentResponse` e `isCurrentEnvelope`.
+- `src/modules/weather/services/forecast.service.ts` — `fetchForecast` (solo orquesta la petición y valida con la guarda).
+- `src/modules/weather/services/current.service.ts` — `fetchCurrent` (solo orquesta la petición y valida con las guardas).
+- `src/modules/weather/utils/hourly.ts` — `indexHourly` y `getDailySun`.
+- `src/modules/location/utils/geocoding.ts` — `MIN_QUERY_LENGTH`, `normalizeGeocodingQuery`, `buildGeocodingUrl` e `isGeocodingResponse`.
+- `src/modules/location/services/geocoding.service.ts` — `searchLocations` (solo normaliza, valida y orquesta).
+- `src/lib/utils/validation.ts` — guardas estructurales compartidas (`isRecord`, `isNumberOrNull`, `isOptionalString`, `isOptionalNumber`, `isNullableNumberArray`, `isNullableStringArray`, `isStringArray`).
+- `src/modules/weather/services/forecast.service.test.ts` — URL, 400, 429, 5xx, respuesta malformada, `current`, `indexHourly` y `getDailySun`.
+- `src/modules/location/services/geocoding.service.test.ts` — mínimo de 3 caracteres, URL, `results` ausente, 400 y respuesta malformada.
+
+**Archivos modificados.**
+
+- `src/modules/location/types/location.types.ts` — `IGeocodingResult` e `IGeocodingResponse`.
+- `docs/specs/001-vesper/tasks/T009-servicios-open-meteo-geocodificacion.md` — estado, criterios y este registro.
+- `docs/specs/001-vesper/tasks/README.md` — T009 marcada como «Terminada».
+
+**Decisiones y desviaciones.**
+
+1. **`TDailySun` reexportado, no duplicado (autorizado por el dueño).** T006 ya lo había definido en `src/modules/night/types/night.types.ts`. `weather.types.ts` hace `export type { TDailySun } from '@/modules/night/types/night.types'`, de modo que el símbolo existe en el módulo `weather` sin dos definiciones equivalentes y sin tocar `night.types.ts`.
+2. **`IInitialForecast` se define aquí.** T009 lo incluye en su lista de archivos y T011 lo vuelve a mencionar. Se creó en T009 para que T011 solo lo consuma; no se duplicó en T011.
+3. **Forma de `ICurrentResponse` (autorizada por el dueño).** Representa el bloque `current` (`time`, `interval` y las 7 medidas). `fetchCurrent` valida el sobre `{ current: ... }` con una guarda interna y devuelve el bloque. La zona horaria y `elevation` se toman del pronóstico, como ya preveía T021.
+4. **Pruebas de `current` y de las utilidades horarias en `forecast.service.test.ts`.** La task solo listaba pruebas para `forecast.service.ts` y `geocoding.service.ts`. Para no crear archivos fuera del scope, los casos de `fetchCurrent`, `indexHourly` y `getDailySun` se agruparon en `forecast.service.test.ts`, que es el archivo de pruebas de datos del módulo `weather`.
+5. **Redondeo en los servicios.** La task no lo repetía, pero el SPEC §4/§5.1 exige coordenadas redondeadas en las URLs. Se aplicó `roundCoordinates` de T005 antes de construir los parámetros. El servicio acepta coordenadas sin redondear y las normaliza.
+6. **Error de programación en geocodificación.** Una consulta de menos de 3 caracteres lanza `Error`, no `ApiError`, y no llama a `fetch`. Es un error de uso, no una respuesta de Open-Meteo.
+7. **Verificación real con archivo temporal.** Se ejecutó `fetchForecast` contra la API real con una prueba temporal en `src/modules/weather/services/__real-api.test.ts`, que se eliminó después. Resultado observado: `elevation: 2586`, `timezone: America/Bogota`, 19 días, del `2026-10-24` al `2026-11-11`, y 456 filas horarias.
+8. **`moon_phase` no se pide.** El SPEC lo permite solo como verificación cruzada y la Luna sale de astronomy-engine; no se añadió a `daily`.
+9. **Funciones auxiliares movidas a `utils/` (ajuste solicitado por el dueño).** Las guardas, los constructores de URL, la normalización de la consulta y las constantes de petición ya no viven en los servicios. `forecast.service.ts`, `current.service.ts` y `geocoding.service.ts` solo orquestan `fetchOpenMeteo` y lanzan los errores de respuesta inválida. Las guardas estructurales genéricas se centralizaron en `src/lib/utils/validation.ts` para no duplicarlas entre módulos.
+
+**Verificación.**
+
+- `pnpm test src/modules/weather src/modules/location` — 5 archivos y 135 pruebas pasan (cifra de esta fase; T010 y T011 añadieron más).
+- `pnpm test` — 11 archivos y 183 pruebas pasan.
+- `pnpm typecheck` — sin errores.
+- `pnpm lint` — 0 errores; se mantiene el warning preexistente de `prettier.config.mjs`.
+- `pnpm build` — compila y prerenderiza `/` y `/_not-found`.
+- Consulta real: `elevation: 2586`, `timezone: America/Bogota`, 19 días, 456 filas horarias.
