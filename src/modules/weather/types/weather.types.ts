@@ -91,3 +91,7 @@ export interface IInitialForecast {
   forecast: IForecastResponse;
   fetchedAt: number;
 }
+
+export interface IUseForecastOptions {
+  initialData?: IInitialForecast;
+}

@@ -4,8 +4,8 @@
 - **SPEC:** §6.2, §7.1, §7.4, §7.5, §9
 - **Depende de:** T010, T011, T017
 - **Desbloquea:** T020, T024
-- **Estado:** Pendiente
-- **Bloqueo:** los datos de Tatacoa, Checua y Lago de Tota los entrega el dueño (T002).
+- **Estado:** Terminada (2026-10-28)
+- **Bloqueo:** los datos de Tatacoa, Checua y Lago de Tota los entrega el dueño (T002). Siguen fuera de la lista curada; se añaden cuando lleguen los datos.
 
 ## Objetivo
 
@@ -68,12 +68,12 @@ Implementar la página de servidor que valida el slug, prerenderiza ciudades cur
 
 ## Criterios de aceptación
 
-- [ ] `generateStaticParams` devuelve exactamente las ciudades curadas.
-- [ ] El número de peticiones del build coincide con el de ciudades curadas.
-- [ ] `generateMetadata` no llama a Open-Meteo.
-- [ ] Un slug válido no curado responde 200.
-- [ ] Un slug inválido responde 404.
-- [ ] Si Open-Meteo falla, la página se genera sin `initialData`.
+- [x] `generateStaticParams` devuelve exactamente las ciudades curadas.
+- [x] El número de peticiones del build coincide con el de ciudades curadas.
+- [x] `generateMetadata` no llama a Open-Meteo.
+- [x] Un slug válido no curado responde 200.
+- [x] Un slug inválido responde 404.
+- [x] Si Open-Meteo falla, la página se genera sin `initialData`.
 
 ## Verificación
 
@@ -83,3 +83,37 @@ Implementar la página de servidor que valida el slug, prerenderiza ciudades cur
 ## Notas y bloqueos
 
 - No se responde 404 a un slug bien formado aunque no haya pronóstico; el estado vacío vive en el cliente.
+
+## Registro de ejecución y desviaciones (2026-10-28)
+
+### Trabajo realizado
+
+- `src/modules/location/types/location.types.ts`: añadido `ICuratedCity` según el contrato de la task.
+- `src/modules/location/constants/curated-cities.ts`: `CURATED_CITIES`, `CURATED_SLUGS` y `getCuratedCity`, con las tres ciudades curadas disponibles.
+- `src/app/clima/[slug]/page.tsx`: `generateStaticParams`, `generateMetadata`, lectura del slug con `parseSlug(slug, CURATED_SLUGS)`, `notFound()` para inválidos, pronóstico de servidor solo para curadas, captura de error fuera del ámbito cacheado, `noindex` para no curadas y `<Suspense>` alrededor del contenedor.
+- `src/modules/night/components/NightContainer.tsx`: shell mínima con `{ slug, initialData }`, completada después por T020.
+
+### Desviaciones autorizadas
+
+1. **`revalidate = 3600` → `'use cache'` + `cacheLife('hours')`.** El proyecto usa `cacheComponents`, donde `export const revalidate` no es compatible. La duración se declara en `fetchInitialForecast`, cuyo `cacheLife('hours')` tiene un `revalidate` de exactamente una hora (SPEC §7.4/§9 corregido). El `Date.now()` del `fetchedAt` queda dentro del ámbito cacheado, de modo que el instante real de la petición viaja con los datos.
+2. **Solo tres ciudades curadas.** Tatacoa, Checua y Lago de Tota no están indexadas por la geocodificación de Open-Meteo y los datos del dueño siguen pendientes; no se inventaron coordenadas. La lista se amplía cuando lleguen.
+3. **`description: ''` en las tres entradas.** El texto propio del dueño aún no existe. `generateMetadata` omite `description` mientras esté vacío, en lugar de publicar un texto inventado.
+4. **Validación del slug en `src/proxy.ts`.** Con `partialPrefetching`, un slug inválido en una ruta dinámica nueva responde primero `200` con `x-nextjs-postponed: 1` y el 404 llega en el stream. Para cumplir «un slug inválido responde 404» con un código real se añadió el proxy con matcher `['/', '/clima/:slug']`, que reescribe a `/_not-found` con status 404. `notFound()` permanece en la página como contrato y respaldo (ver T018).
+5. **`<Suspense>` en la página.** `useSearchParams` en el contenedor cliente y la lectura de `params` lo exigen con Cache Components; el fallback `NightPageSkeleton` replica el tamaño del bloque final.
+
+### Corrección posterior (2026-11-02)
+
+`next dev` reportaba en cada petición el aviso `instant-shell-url-data` porque `ClimaPage` hacía `await params` fuera del `<Suspense>`. La página pasó a ser síncrona y el acceso a `params` se movió a `ClimaContent`, un componente servidor asíncrono renderizado dentro del boundary. `generateStaticParams`, el prerenderizado y el 404 no cambian.
+
+### Evidencia
+
+- `pnpm build`: prerenderiza exactamente `/clima/bogota`, `/clima/guatavita` y `/clima/villa-de-leyva`; tres peticiones de pronóstico, una por curada. `generateMetadata` no genera peticiones.
+- Slug no curado bien formado (`/clima/zipaquira_5.02_-73.99`): `200`, sin pronóstico inicial y sin petición de servidor.
+- Slug inválido: `404` real desde la primera petición.
+- `initialData` y `fetchedAt` aparecen serializados en el payload RSC.
+- Fallo de Open-Meteo: la excepción se captura fuera de `'use cache'`, por lo que no se cachea el error y el contenedor se renderiza sin `initialData`.
+- `pnpm test`, `pnpm typecheck`, `pnpm lint` y `pnpm build`: sin errores.
+
+### Observación para T021/T022/T023
+
+El HTML estático de las curadas contiene el esqueleto, no el pronóstico, porque `NightContainer` espera a `useSearchParams` y al reloj de cliente antes de pintar. El SPEC §7.6 exige que el contenido estático se renderice en el HTML; queda para las tasks visuales.

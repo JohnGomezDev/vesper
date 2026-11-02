@@ -4,7 +4,7 @@
 - **SPEC:** §6.1, §7.1
 - **Depende de:** T005, T007
 - **Desbloquea:** —
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-28)
 
 ## Objetivo
 
@@ -67,11 +67,11 @@ Redirigir la raíz al slug de coordenadas aproximadas del visitante, sin llamar 
 
 ## Criterios de aceptación
 
-- [ ] Con cabeceras válidas, la redirección usa solo coordenadas redondeadas.
-- [ ] Sin cabeceras, redirige a Bogotá.
-- [ ] La redirección es 307.
-- [ ] No se llama a Open-Meteo ni se consulta la lista curada.
-- [ ] La ruta no se prerenderiza.
+- [x] Con cabeceras válidas, la redirección usa solo coordenadas redondeadas.
+- [x] Sin cabeceras, redirige a Bogotá.
+- [x] La redirección es 307.
+- [x] No se llama a Open-Meteo ni se consulta la lista curada.
+- [x] La ruta no se prerenderiza.
 
 ## Verificación
 
@@ -81,3 +81,24 @@ Redirigir la raíz al slug de coordenadas aproximadas del visitante, sin llamar 
 ## Notas y bloqueos
 
 - Si los nombres de cabecera confirmados en T001 difieren, se cambia solo `ip-location.ts`.
+
+## Registro de ejecución y desviaciones (2026-10-28)
+
+### Trabajo realizado
+
+- `src/modules/location/utils/ip-location.ts`: `readApproximateLocation(headerList: Headers): ICoordinates | null` y `APPROXIMATE_LOCATION_ID`, con lectura de `x-vercel-ip-latitude` y `x-vercel-ip-longitude`, validación de finitud/rango y redondeo con `roundCoordinates`.
+- `src/modules/location/utils/ip-location.test.ts`: 11 pruebas (cabeceras válidas, una sola cabecera, valores no numéricos, fuera de rango y redondeo).
+- `src/app/page.tsx`: componente servidor asíncrono que lee `headers()` y redirige.
+
+### Desviaciones autorizadas
+
+1. **`export const dynamic = 'force-dynamic'` → `export const instant = false`.** Con `cacheComponents`, la directiva `dynamic` produce error de configuración. `instant = false` es el mecanismo de Next 16 equivalente para forzar que la ruta no se prerenderice y se resuelva en cada petición. Autorizado antes de implementarlo.
+2. **Redirección real mediante `src/proxy.ts`.** En un componente de servidor, `redirect()` solo se emite después de enviar el shell 200, así que la respuesta no era un 307 real. El proxy con matcher `['/', '/clima/:slug']` reutiliza `readApproximateLocation` y responde `307` a `/clima/<lat>_<lon>` (o a `/clima/bogota` sin cabeceras o con datos inválidos). La página conserva `redirect()` como contrato y respaldo.
+3. **Ampliación del matcher a `/clima/:slug`.** Se descubrió que los slugs inválidos de rutas dinámicas nuevas no devolvían un 404 real; el proxy ahora también valida esos slugs (detalle en T019). Autorizado para mantener una sola pieza de nivel de petición.
+
+### Evidencia
+
+- `curl -I /` sin cabeceras de IP: `307` con `location: /clima/bogota`.
+- `curl -I /` con `x-vercel-ip-latitude`/`x-vercel-ip-longitude`: `307` con solo coordenadas redondeadas (`/clima/-54.80_-68.30` en la prueba simulada).
+- Cero peticiones a Open-Meteo y ninguna consulta a la lista curada en la redirección.
+- `pnpm test src/modules/location`, `pnpm typecheck`, `pnpm lint` y `pnpm build`: sin errores.

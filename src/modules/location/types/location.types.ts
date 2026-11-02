@@ -1,3 +1,5 @@
+import type { UseFormRegisterReturn, UseFormReturn } from 'react-hook-form';
+
 export interface ICoordinates {
   latitude: number;
   longitude: number;
@@ -10,6 +12,20 @@ export interface ILocation {
   elevationM: number | null;
   timeZone: string;
   isCurated: boolean;
+}
+
+/**
+ * One entry of the fixed curated list (SPEC §9). `description` is the owner's
+ * own «why observe here» text; it stays empty until the owner delivers it.
+ */
+export interface ICuratedCity {
+  slug: string;
+  name: string;
+  coordinates: ICoordinates;
+  elevationM: number | null;
+  timeZone: string;
+  description: string;
+  isCurated: true;
 }
 
 /**
@@ -48,3 +64,30 @@ export type TDateParamResult =
   | { kind: 'missing' }
   | { kind: 'invalid' }
   | { kind: 'out-of-range' };
+
+export interface ISearchFormValues {
+  query: string;
+}
+
+export interface IUseSearchFormResult {
+  form: UseFormReturn<ISearchFormValues>;
+  registerQuery: UseFormRegisterReturn<'query'>;
+  results: IGeocodingResult[];
+  isSearching: boolean;
+  isError: boolean;
+  hasSearched: boolean;
+  isResultsOpen: boolean;
+  closeResults: () => void;
+  onSubmit: (event?: React.BaseSyntheticEvent) => Promise<void>;
+}
+
+export interface IUseGpsLocationResult {
+  requestLocation: () => Promise<void>;
+  isRequesting: boolean;
+  error: string | null;
+}
+
+export interface IUseLocationNameInput {
+  slug: string;
+  result: TSlugParseResult;
+}

@@ -1,12 +1,13 @@
-import { RAIN_LIKELY_THRESHOLD_PCT } from '@/modules/night/constants/score.constants';
+import { ASTRONOMICAL_NIGHT_MAX_SUN_ALTITUDE_DEG } from '@/modules/night/constants/night.constants';
+import {
+  RAIN_LIKELY_THRESHOLD_PCT,
+  SCORE_LABEL_TEXT,
+} from '@/modules/night/constants/score.constants';
 import type { IHourlyScore, INightSummary } from '@/modules/night/types/night.types';
 import { computeCloudCover } from '@/modules/night/utils/cloud';
 import { computeHourlyScore, computeNightScore } from '@/modules/night/utils/score';
 import { parseLocalDateTime } from '@/modules/location/utils/datetime';
 import type { IHourlyRow } from '@/modules/weather/types/weather.types';
-
-/** Only hours with the Sun below −18° enter the score (SPEC §8.6). */
-const ASTRONOMICAL_NIGHT_MAX_SUN_ALTITUDE_DEG = -18;
 
 /**
  * Summary of one night for the selector (SPEC §8.2, §8.6).
@@ -101,4 +102,12 @@ export function getNightSummary(input: {
     cloudAverage,
     rainLikely,
   };
+}
+
+export function formatNightScore(summary: INightSummary | null): string | null {
+  if (summary === null || summary.score === null) {
+    return null;
+  }
+
+  return `${SCORE_LABEL_TEXT[summary.label ?? 'bad']} (${Math.round(summary.score)} pts)`;
 }

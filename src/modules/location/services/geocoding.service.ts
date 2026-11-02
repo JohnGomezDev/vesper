@@ -1,10 +1,10 @@
 import { fetchOpenMeteo } from '@/lib/api/api-client';
-import type { IFetchOptions } from '@/lib/api/api-client';
+import type { IFetchOptions } from '@/lib/types/api.types';
+import { MIN_QUERY_LENGTH } from '@/modules/location/constants/location.constants';
 import type { IGeocodingResult } from '@/modules/location/types/location.types';
 import {
   buildGeocodingUrl,
   isGeocodingResponse,
-  MIN_QUERY_LENGTH,
   normalizeGeocodingQuery,
 } from '@/modules/location/utils/geocoding';
 

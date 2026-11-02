@@ -1,6 +1,5 @@
 import { ApiError } from '@/lib/api/api-client';
-
-const MAX_RETRIES = 3;
+import { MAX_RETRIES } from '@/lib/constants/api.constants';
 
 /**
  * Retry policy from SPEC §7.3:

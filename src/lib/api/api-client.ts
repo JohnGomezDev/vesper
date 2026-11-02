@@ -1,3 +1,5 @@
+import type { IFetchOptions } from '@/lib/types/api.types';
+
 export class ApiError extends Error {
   readonly status: number | null;
   readonly body: string;
@@ -8,13 +10,6 @@ export class ApiError extends Error {
     this.status = status;
     this.body = body;
   }
-}
-
-export type TCacheMode = 'server' | 'client';
-
-export interface IFetchOptions {
-  cacheMode: TCacheMode;
-  signal?: AbortSignal;
 }
 
 /**

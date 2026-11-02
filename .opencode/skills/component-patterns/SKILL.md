@@ -5,6 +5,7 @@ description: Use when creating or editing React components or pages in Vesper â€
 
 # Component Patterns
 
+- File placement follows the `module-structure` skill: no domain constants, non-Props types, or pure helpers inside a component.
 - No business logic inside components besides from hooks calls.
 
 **Rule**: push `'use client'` as far down the tree as possible. A page can be a Server Component that imports one small Client Component leaf â€” that is the preferred pattern.

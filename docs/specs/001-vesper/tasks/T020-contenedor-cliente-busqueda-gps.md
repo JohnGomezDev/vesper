@@ -4,7 +4,7 @@
 - **SPEC:** §6.3, §8.1
 - **Depende de:** T019
 - **Desbloquea:** T021
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-10-28)
 
 ## Objetivo
 
@@ -75,12 +75,12 @@ Construir la capa cliente de `/clima/[slug]`: lectura de URL, cálculo de la noc
 
 ## Criterios de aceptación
 
-- [ ] No se pide permiso de GPS al cargar.
-- [ ] Un enlace frío a un slug de coordenadas no llama a geocodificación.
-- [ ] Cambiar de noche usa `replace` y no apila historial.
-- [ ] El aviso de zona horaria aparece solo si difiere de la del dispositivo.
-- [ ] No se muestran datos de un lugar bajo el nombre de otro.
-- [ ] El buscador no busca con menos de 3 caracteres ni sin pulsar.
+- [x] No se pide permiso de GPS al cargar.
+- [x] Un enlace frío a un slug de coordenadas no llama a geocodificación.
+- [x] Cambiar de noche usa `replace` y no apila historial.
+- [x] El aviso de zona horaria aparece solo si difiere de la del dispositivo.
+- [x] No se muestran datos de un lugar bajo el nombre de otro.
+- [x] El buscador no busca con menos de 3 caracteres ni sin pulsar.
 
 ## Verificación
 
@@ -90,3 +90,61 @@ Construir la capa cliente de `/clima/[slug]`: lectura de URL, cálculo de la noc
 ## Notas y bloqueos
 
 - El nombre «Mi ubicación» para el GPS es texto de interfaz; no altera el modelo de datos.
+
+## Registro de ejecución y desviaciones (2026-10-28)
+
+### Trabajo realizado
+
+- `src/modules/location/utils/name-cache.ts`: caché de nombres en memoria de sesión, clave por coordenadas redondeadas; `rememberLocationName` y `recallLocationName`.
+- `src/modules/location/hooks/use-search-form.ts`: `useForm<{ query: string }>`, reglas `required` y `minLength: 3`, query de geocodificación activada solo al enviar.
+- `src/modules/location/hooks/use-gps-location.ts`: `requestLocation()` con `getCurrentPosition(..., { timeout: 10000 })`, traducción de `PERMISSION_DENIED`, `POSITION_UNAVAILABLE` y `TIMEOUT`, nombre «Mi ubicación» en caché y navegación con `router.replace`.
+- `src/modules/location/hooks/use-location-name.ts`: orden curada → nombre recordado → etiqueta del slug → «Ubicación aproximada» con coordenadas.
+- `src/modules/location/components/SearchForm.tsx`, `LocationSelector.tsx` y `UseMyLocationButton.tsx`.
+- `src/modules/night/hooks/use-night-analysis.ts`: cálculo memoizado de noche, filas, ventanas, mejor ventana, Luna, resumen y altitudes solares.
+- `src/modules/night/components/NightContainer.tsx`: contenedor cliente completo.
+- `src/app/clima/[slug]/page.tsx`: `NightContainer` envuelto en `<Suspense>` con `NightPageSkeleton`.
+
+### Desviaciones autorizadas
+
+1. **Pruebas de `name-cache` y `use-search-form` omitidas por decisión del dueño.** El paso 6 y su criterio de verificación quedan sin cubrir a propósito; la validación se comprobó en navegador. Cuando se retomen, los archivos previstos son `name-cache.test.ts` y una prueba de validación de `use-search-form`.
+2. **`useEffect` + `mounted` sustituido por `useSyncExternalStore`.** El lint del React Compiler prohíbe `setState` síncrono dentro de un efecto y `Date.now()` durante el render. Se usa una instantánea de reloj de 15 minutos (`server snapshot = 0`) que además mantiene el cálculo de la noche actualizado sin estado duplicado.
+3. **Umbral de altitud temporal fijo en 15°.** T022 introducirá `AltitudeThresholdProvider`; hasta entonces `NightContainer` usa `TEMPORARY_ALTITUDE_THRESHOLD` y lo sustituirá por el valor del contexto.
+4. **`getPlanetElongation` añadido a `src/modules/astronomy/services/planets.service.ts`.** Está fuera de la lista de archivos de la task, pero es necesario para alimentar `elongationByObject` sin llamar a `getPlanetInfo` por cada planeta en cada render. Autorizado antes de implementarlo.
+5. **URL de la noche con `usePathname()` y respaldo canónico.** El cambio de noche usa `router.replace(ROUTES.clima.detail(slug) + '?date=' + date, { scroll: false })`; si `usePathname()` no está disponible se usa `ROUTES.clima.detail(slug)`.
+6. **404 real de slugs inválidos mediante `src/proxy.ts`.** Ver T018/T019: sin el proxy la primera respuesta de una ruta dinámica nueva es un 200 con streaming del 404.
+7. **La puntuación de nubosidad de la mejor ventana es la media de las filas solapadas.** `pickBestWindow` espera un valor numérico de nubosidad por ventana, no una serie horaria.
+8. **`isArchived` compara con la noche actual (`nightDate < currentNightDate`), no con el día local.** A la 1 de la madrugada la noche en curso no debe marcarse como archivada.
+9. **Altitudes solares con `getSunPosition` (refracción aplicada).** La diferencia cerca de −18° se documenta como decisión.
+10. **`?date=` inválido o fuera de rango cae en la noche actual.** El mensaje descriptivo se difiere a T022/T023.
+11. **El cambio de noche actualiza `?date=` con `replace`, sin apilar historial.** Verificado con `history.length` constante.
+
+### Evidencia (navegador y comandos)
+
+- Al cargar, el permiso de GPS sigue en `prompt`; no se pide ubicación ni se geocodifica.
+- 2 caracteres: «Escribe al menos 3 caracteres.» y cero peticiones de geocodificación. 3 caracteres y envío: una petición, 7 resultados con nombre, región y país.
+- Cambio de noche: `?date=2026-10-29`, `history.length` sin cambios (replace).
+- Bogotá sin aviso de zona horaria; Madrid muestra «Horas locales de Madrid · Europe/Madrid».
+- GPS: navega a `/clima/4.71_-74.07` y el título es «Mi ubicación».
+- Selección del buscador: navega a `/clima/villa-de-leyva_5.63_-73.52` con el nombre recordado «Villa de Leyva, Departamento de Boyacá, Colombia».
+- `pnpm test`: 22 archivos, 362 pruebas correctas. `pnpm typecheck`, `pnpm lint` (0 errores), `pnpm build` y Prettier en los archivos tocados: sin errores.
+
+### Corrección posterior (2026-11-02)
+
+**Fallo 1:** tras una búsqueda, al pulsar «Usar mi ubicación precisa» el listado de resultados seguía desplegado. La lista se renderizaba siempre que `results.length > 0`, sin estado de apertura ni cierre; el clic en GPS no lo descartaba y el estado sobrevivía a la navegación entre slugs.
+
+**Fallo 2:** tras una búsqueda, el clic en GPS volvía a rellenar el input con el término buscado y, al borrarlo, aparecía «Escribe un lugar.». El formulario reiniciado vivía en el estado local de cada página; al volver por GPS a una URL ya visitada, Next.js restauraba la página cacheada con su formulario antiguo (texto y estado enviado incluidos).
+
+**Solución:**
+
+- `use-search-form` expone `isResultsOpen` y `closeResults()`. La lista solo se abre con un envío válido del formulario.
+- `SearchForm` cierra los resultados al seleccionar un resultado, al hacer `pointerdown` fuera del buscador (incluye el botón de GPS y los selectores), al sacar el foco del buscador y con `Escape`.
+- Los mensajes de error y «No se encontraron lugares» solo se muestran con el listado abierto.
+- `use-search-reset` mantiene un token global con `useSyncExternalStore`. `resetSearch()` lo incrementa y todas las páginas montadas —incluidas las que Next.js conserva ocultas en su caché de cliente— reinician su `SearchForm` mediante `key={`${slug}-${searchResetToken}`}`.
+- Se llama a `resetSearch()` al pedir GPS (`onBeforeRequest`), al elegir una ciudad curada (`onSelect`) y al seleccionar un resultado de búsqueda.
+- `UseMyLocationButton` acepta `onBeforeRequest` y `LocationSelector` acepta `onSelect`; ambos avisan antes de navegar.
+
+**Verificación:** con `/clima/4.71_-74.07` ya visitado, se busca «Villeta» en esa página, se elige el resultado y se pulsa GPS de nuevo. Antes, el input restaurado mostraba «Villeta» y al borrarlo aparecía «Escribe un lugar.»; ahora vuelve vacío y sin error. También quedan vacíos el formulario visible y el de la página cacheada al elegir una ciudad curada. `pnpm test` (22 archivos, 362 pruebas), `pnpm typecheck`, `pnpm lint` (0 errores) y Prettier siguen correctos.
+
+### Pendiente para T021/T022/T023
+
+El HTML estático de una ciudad curada muestra el esqueleto porque el contenedor espera a `useSearchParams` y al reloj de cliente. El SPEC §7.6 exige contenido estático en el HTML; las tasks visuales deben resolverlo.

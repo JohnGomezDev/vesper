@@ -1,7 +1,44 @@
-import type { TNightWindow } from '@/modules/night/types/night.types';
+import { MS_PER_HOUR } from '@/modules/night/constants/night.constants';
+import type { INightAnalysis, TNightWindow } from '@/modules/night/types/night.types';
 import { addDays, getTodayLocalDate, parseLocalDateTime } from '@/modules/location/utils/datetime';
 
-const MS_PER_HOUR = 3_600_000;
+export function createEmptyAnalysis(nightDate: string): INightAnalysis {
+  return {
+    nightDate,
+    isArchived: false,
+    rows: [],
+    window: { kind: 'no-astronomical-night' },
+    windows: [],
+    bestWindow: null,
+    moon: null,
+    summary: null,
+    sunAltitudes: new Map(),
+  };
+}
+
+/** Last hourly row whose one-hour interval contains `instantMs`, or `-1`. */
+export function findHourIndex(rowInstants: number[], instantMs: number): number {
+  let low = 0;
+  let high = rowInstants.length - 1;
+  let found = -1;
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+
+    if (rowInstants[middle] <= instantMs) {
+      found = middle;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  if (found === -1 || instantMs >= rowInstants[found] + MS_PER_HOUR) {
+    return -1;
+  }
+
+  return found;
+}
 
 export function getNightWindow(input: {
   date: string;

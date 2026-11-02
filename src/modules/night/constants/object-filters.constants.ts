@@ -1,17 +1,4 @@
-import type { TPlanetId } from '@/modules/astronomy/types/astronomy.types';
-import type { TBrightnessLabel, TRequiredDarkness } from '@/modules/night/types/night.types';
-
-/** Every target that can generate an observation window; the Sun is excluded. */
-export type TWindowObjectId = TPlanetId | 'moon';
-
-/** Static filters per target (SPEC §8.5). */
-export interface IObjectFilter {
-  /** The Sun must be strictly below this altitude. */
-  requiredDarkness: TRequiredDarkness;
-  brightnessLabel: TBrightnessLabel;
-  /** Only Uranus and Neptune highlight the Moon-free window (SPEC §8.5.5). */
-  requiresMoonFreeHighlight: boolean;
-}
+import type { IObjectFilter, TWindowObjectId } from '@/modules/night/types/night.types';
 
 /**
  * Filter map from SPEC §8.5. The brightness label is static per target (T016

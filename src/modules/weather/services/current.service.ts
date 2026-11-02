@@ -1,5 +1,5 @@
 import { fetchOpenMeteo } from '@/lib/api/api-client';
-import type { IFetchOptions } from '@/lib/api/api-client';
+import type { IFetchOptions } from '@/lib/types/api.types';
 import type { ICoordinates } from '@/modules/location/types/location.types';
 import type { ICurrentResponse } from '@/modules/weather/types/weather.types';
 import {

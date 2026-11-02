@@ -7,45 +7,18 @@ import {
 } from '@/lib/utils/validation';
 import type { ICoordinates } from '@/modules/location/types/location.types';
 import { roundCoordinates } from '@/modules/location/utils/coordinates';
+import {
+  DAILY_VARIABLES,
+  FORECAST_DAYS,
+  FORECAST_PAST_DAYS,
+  HOURLY_NUMBER_FIELDS,
+  HOURLY_VARIABLES,
+} from '@/modules/weather/constants/weather.constants';
 import type {
   IDailyData,
   IForecastResponse,
   IHourlyData,
 } from '@/modules/weather/types/weather.types';
-
-const HOURLY_VARIABLES = [
-  'cloud_cover',
-  'cloud_cover_low',
-  'cloud_cover_mid',
-  'cloud_cover_high',
-  'visibility',
-  'temperature_2m',
-  'relative_humidity_2m',
-  'dew_point_2m',
-  'wind_speed_10m',
-  'wind_gusts_10m',
-  'precipitation_probability',
-  'precipitation',
-  'is_day',
-] as const;
-
-const DAILY_VARIABLES = ['sunrise', 'sunset'] as const;
-
-const HOURLY_NUMBER_FIELDS = [
-  'cloud_cover',
-  'cloud_cover_low',
-  'cloud_cover_mid',
-  'cloud_cover_high',
-  'visibility',
-  'temperature_2m',
-  'relative_humidity_2m',
-  'dew_point_2m',
-  'wind_speed_10m',
-  'wind_gusts_10m',
-  'precipitation_probability',
-  'precipitation',
-  'is_day',
-] as const satisfies ReadonlyArray<Exclude<keyof IHourlyData, 'time'>>;
 
 function isHourlyData(value: unknown): value is IHourlyData {
   if (!isRecord(value) || !isStringArray(value.time)) {
@@ -88,8 +61,8 @@ export function buildForecastUrl(coordinates: ICoordinates): string {
     hourly: HOURLY_VARIABLES.join(','),
     daily: DAILY_VARIABLES.join(','),
     timezone: 'auto',
-    past_days: '3',
-    forecast_days: '16',
+    past_days: FORECAST_PAST_DAYS,
+    forecast_days: FORECAST_DAYS,
   });
 
   return `${OPEN_METEO_FORECAST_URL}?${params.toString()}`;

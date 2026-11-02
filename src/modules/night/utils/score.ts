@@ -12,8 +12,7 @@ import {
   WIND_SCORE_FALLBACK_POINTS,
   WIND_SCORE_STEPS,
 } from '@/modules/night/constants/score.constants';
-import type { TScoreStep } from '@/modules/night/constants/score.constants';
-import type { IHourlyScore, TScoreLabel } from '@/modules/night/types/night.types';
+import type { IHourlyScore, TScoreLabel, TScoreStep } from '@/modules/night/types/night.types';
 
 /**
  * Precision hygiene for binary floating point, not display rounding: the result

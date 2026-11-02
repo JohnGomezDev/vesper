@@ -1,8 +1,4 @@
-/** One ascending step of a points table: `value <= max` earns `points`. */
-export type TScoreStep = {
-  max: number;
-  points: number;
-};
+import type { TScoreLabel, TScoreStep } from '@/modules/night/types/night.types';
 
 /** Cloud points (SPEC §8.6). The border belongs to the better step. */
 export const CLOUD_SCORE_STEPS: readonly TScoreStep[] = [
@@ -66,3 +62,10 @@ export const SCORE_LABEL_THRESHOLDS = {
   good: 65,
   fair: 50,
 } as const;
+
+export const SCORE_LABEL_TEXT: Record<TScoreLabel, string> = {
+  excellent: 'Excelente',
+  good: 'Buena',
+  fair: 'Regular',
+  bad: 'Mala',
+};

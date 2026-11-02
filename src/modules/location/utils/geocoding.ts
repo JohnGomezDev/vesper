@@ -2,8 +2,6 @@ import { OPEN_METEO_GEOCODING_URL } from '@/lib/constants/api.constants';
 import { isOptionalNumber, isOptionalString, isRecord } from '@/lib/utils/validation';
 import type { IGeocodingResponse, IGeocodingResult } from '@/modules/location/types/location.types';
 
-export const MIN_QUERY_LENGTH = 3;
-
 const RESULT_COUNT = 7;
 
 export function normalizeGeocodingQuery(query: string | null): string {
@@ -54,4 +52,20 @@ export function buildGeocodingUrl(query: string): string {
   });
 
   return `${OPEN_METEO_GEOCODING_URL}?${params.toString()}`;
+}
+
+function joinLocationParts(parts: Array<string | null | undefined>): string {
+  return parts
+    .filter((value): value is string => value !== null && value !== undefined && value !== '')
+    .join(', ');
+}
+
+/** Full display name: place, region and country. */
+export function formatGeocodingResultName(result: IGeocodingResult): string {
+  return joinLocationParts([result.name, result.admin1, result.country]);
+}
+
+/** Secondary line under the place name: region and country. */
+export function formatGeocodingResultDescription(result: IGeocodingResult): string {
+  return joinLocationParts([result.admin1, result.country]);
 }

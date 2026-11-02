@@ -1,4 +1,6 @@
-import type { TPlanetId } from '@/modules/astronomy/types/astronomy.types';
+import type { IMoonInfo, TPlanetId } from '@/modules/astronomy/types/astronomy.types';
+import type { TSlugParseResult } from '@/modules/location/types/location.types';
+import type { IForecastResponse, IHourlyRow } from '@/modules/weather/types/weather.types';
 
 export type TNightWindow =
   { kind: 'available'; startMs: number; endMs: number } | { kind: 'no-astronomical-night' };
@@ -73,4 +75,46 @@ export interface INightSummary {
 export interface IHourlyScore {
   instantMs: number;
   score: number | null;
+}
+
+/** Slug that resolves to an actual location (curated or coordinates). */
+export type TValidSlug = Extract<TSlugParseResult, { kind: 'curated' | 'coordinates' }>;
+
+/** Every target that can generate an observation window; the Sun is excluded. */
+export type TWindowObjectId = TPlanetId | 'moon';
+
+/** Static filters per target (SPEC §8.5). */
+export interface IObjectFilter {
+  /** The Sun must be strictly below this altitude. */
+  requiredDarkness: TRequiredDarkness;
+  brightnessLabel: TBrightnessLabel;
+  /** Only Uranus and Neptune highlight the Moon-free window (SPEC §8.5.5). */
+  requiresMoonFreeHighlight: boolean;
+}
+
+/** One ascending step of a points table: `value <= max` earns `points`. */
+export type TScoreStep = {
+  max: number;
+  points: number;
+};
+
+export interface IUseNightAnalysisInput {
+  slug: string;
+  date: string | null;
+  threshold: number;
+  forecast: IForecastResponse | undefined;
+  /** Client clock sampled outside render; `null` before hydration. */
+  nowMs: number | null;
+}
+
+export interface INightAnalysis {
+  nightDate: string;
+  isArchived: boolean;
+  rows: IHourlyRow[];
+  window: TNightWindow;
+  windows: IObservationWindow[];
+  bestWindow: IObservationWindow | null;
+  moon: IMoonInfo | null;
+  summary: INightSummary | null;
+  sunAltitudes: Map<number, number>;
 }

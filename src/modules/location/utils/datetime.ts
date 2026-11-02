@@ -18,6 +18,10 @@ interface ILocalParts {
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
 
+export function getDeviceTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 function getFormatter(timeZone: string): Intl.DateTimeFormat {
   const cached = formatterCache.get(timeZone);
 

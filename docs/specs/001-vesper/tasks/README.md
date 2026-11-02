@@ -171,9 +171,9 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T015 | F5   | Nubosidad y fases lunares                              | T006, T014             | Terminada |
 | T016 | F5   | Ventanas de observación e interferencia lunar          | T015                   | Terminada |
 | T017 | F5   | Mejor ventana, puntuación y pruebas                    | T016                   | Terminada |
-| T018 | F6   | Redirección de `/` por cabeceras de IP                 | T005, T007             | Pendiente |
-| T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales   | T010, T011, T017       | Pendiente |
-| T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres            | T019                   | Pendiente |
+| T018 | F6   | Redirección de `/` por cabeceras de IP                 | T005, T007             | Terminada |
+| T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales   | T010, T011, T017       | Terminada |
+| T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres            | T019                   | Terminada |
 | T021 | F7   | Bloque «Ahora» y tira horaria                          | T020                   | Pendiente |
 | T022 | F7   | Luna, ventanas y selectores                            | T021                   | Pendiente |
 | T023 | F7   | Estados, accesibilidad e hidratación                   | T022                   | Pendiente |

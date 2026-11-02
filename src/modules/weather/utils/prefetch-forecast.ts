@@ -2,10 +2,9 @@ import { noop } from '@tanstack/react-query';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ICoordinates } from '@/modules/location/types/location.types';
 import { roundCoordinates } from '@/modules/location/utils/coordinates';
+import { FORECAST_STALE_TIME_MS } from '@/modules/weather/constants/weather.constants';
 import { weatherKeys } from '@/modules/weather/constants/weather.query-keys';
 import { fetchForecast } from '@/modules/weather/services/forecast.service';
-
-const FORECAST_STALE_TIME_MS = 3_600_000;
 
 /**
  * Warms the forecast cache before navigating to a searched place (SPEC §8.1).

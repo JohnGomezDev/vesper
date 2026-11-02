@@ -14,7 +14,7 @@ import {
   OBJECT_FILTERS,
   WINDOW_OBJECT_IDS,
 } from '@/modules/night/constants/object-filters.constants';
-import type { TWindowObjectId } from '@/modules/night/constants/object-filters.constants';
+import type { TWindowObjectId } from '@/modules/night/types/night.types';
 import type {
   IObservationWindow,
   IMoonInterferenceNotice,

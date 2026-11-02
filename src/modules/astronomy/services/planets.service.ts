@@ -67,6 +67,24 @@ export function getPlanetPosition(
 }
 
 /**
+ * Elongation from the Sun for Mercury and Venus, in degrees (SPEC §8.5.4).
+ *
+ * `Elongation` does not depend on the observer, so this helper avoids the
+ * magnitude, Moon separation and culmination work of `getPlanetInfo` when the
+ * observation windows only need the elongation filter. Every other planet
+ * reports `null`, matching `getPlanetInfo`.
+ */
+export function getPlanetElongation(planetId: TPlanetId, instantMs: number): number | null {
+  if (!ELONGATION_PLANETS.has(planetId)) {
+    return null;
+  }
+
+  const elongation = Elongation(PLANET_BODIES[planetId], new Date(instantMs));
+
+  return elongation === null ? null : elongation.elongation;
+}
+
+/**
  * Angular separation between two apparent horizontal positions, in degrees.
  *
  * The declared signature receives `IHorizontalPosition` values, not the
