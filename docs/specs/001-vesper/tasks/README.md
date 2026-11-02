@@ -174,9 +174,9 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T018 | F6   | Redirección de `/` por cabeceras de IP                 | T005, T007             | Terminada |
 | T019 | F6   | Ruta `/clima/[slug]`, lista curada y datos iniciales   | T010, T011, T017       | Terminada |
 | T020 | F6   | Contenedor cliente, búsqueda, GPS y nombres            | T019                   | Terminada |
-| T021 | F7   | Bloque «Ahora» y tira horaria                          | T020                   | Pendiente |
-| T022 | F7   | Luna, ventanas y selectores                            | T021                   | Pendiente |
-| T023 | F7   | Estados, accesibilidad e hidratación                   | T022                   | Pendiente |
+| T021 | F7   | Bloque «Ahora» y tira horaria                          | T020                   | Terminada |
+| T022 | F7   | Luna, ventanas y selectores                            | T021                   | Terminada |
+| T023 | F7   | Estados, accesibilidad e hidratación                   | T022                   | Terminada |
 | T024 | F8   | SEO, sitemap, robots y noindex                         | T019                   | Pendiente |
 | T025 | F8   | Páginas legales                                        | T004                   | Pendiente |
 | T026 | F8   | Atribución, not-found y error                          | T004                   | Pendiente |

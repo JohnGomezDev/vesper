@@ -2,6 +2,8 @@ import { MS_PER_HOUR } from '@/modules/night/constants/night.constants';
 import type { INightAnalysis, TNightWindow } from '@/modules/night/types/night.types';
 import { addDays, getTodayLocalDate, parseLocalDateTime } from '@/modules/location/utils/datetime';
 
+const HOURS_PER_DAY = 24;
+
 export function createEmptyAnalysis(nightDate: string): INightAnalysis {
   return {
     nightDate,
@@ -10,9 +12,15 @@ export function createEmptyAnalysis(nightDate: string): INightAnalysis {
     window: { kind: 'no-astronomical-night' },
     windows: [],
     bestWindow: null,
+    notices: [],
     moon: null,
+    moonPeakAltitudeDeg: null,
+    moonPeakMs: null,
+    currentSunAltitudeDeg: null,
     summary: null,
     sunAltitudes: new Map(),
+    cloudByTime: new Map(),
+    cloudClassByTime: new Map(),
   };
 }
 
@@ -52,10 +60,23 @@ export function getNightWindow(input: {
     return { kind: 'no-astronomical-night' };
   }
 
+  const sunsetMs = parseLocalDateTime(sunset, timeZone);
+  const sunriseMs = parseLocalDateTime(sunriseNext, timeZone);
+
+  // Open-Meteo returns `00:00` for both events during polar day/night instead
+  // of `null`. That produces a 24-hour difference, which is not a night.
+  if (sunriseMs - sunsetMs >= HOURS_PER_DAY * MS_PER_HOUR) {
+    return { kind: 'no-astronomical-night' };
+  }
+
+  if (sunriseMs <= sunsetMs) {
+    return { kind: 'no-astronomical-night' };
+  }
+
   return {
     kind: 'available',
-    startMs: parseLocalDateTime(sunset, timeZone) - MS_PER_HOUR,
-    endMs: parseLocalDateTime(sunriseNext, timeZone) + MS_PER_HOUR,
+    startMs: sunsetMs - MS_PER_HOUR,
+    endMs: sunriseMs + MS_PER_HOUR,
   };
 }
 

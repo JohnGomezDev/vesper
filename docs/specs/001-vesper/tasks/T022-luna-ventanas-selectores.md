@@ -5,7 +5,7 @@
 - **Depende de:** T021
 - **Desbloquea:** T023
 - **Diseño:** usar las imágenes de `docs/specs/001-vesper/design/` cuando estén disponibles.
-- **Estado:** Pendiente
+- **Estado:** Terminada (2026-11-02)
 
 ## Objetivo
 
@@ -71,12 +71,12 @@ La pantalla muestra el panel lunar, la lista de ventanas, el resumen de mejor ve
 
 ## Criterios de aceptación
 
-- [ ] Cambiar el umbral recalcula ventanas y mejor ventana sin petición nueva.
-- [ ] Cambiar de noche no dispara peticiones.
-- [ ] El Sol no aparece en ninguna lista de ventanas.
-- [ ] Urano y Neptuno muestran la ventana sin Luna destacada.
-- [ ] El selector muestra palabra, número, nubosidad media y lluvia probable.
-- [ ] El umbral vuelve a 15 al cerrar y abrir la pestaña.
+- [x] Cambiar el umbral recalcula ventanas y mejor ventana sin petición nueva.
+- [x] Cambiar de noche no dispara peticiones.
+- [x] El Sol no aparece en ninguna lista de ventanas.
+- [x] Urano y Neptuno muestran la ventana sin Luna destacada.
+- [x] El selector muestra palabra, número, nubosidad media y lluvia probable.
+- [x] El umbral vuelve a 15 al cerrar y abrir la pestaña.
 
 ## Verificación
 
@@ -87,3 +87,58 @@ La pantalla muestra el panel lunar, la lista de ventanas, el resumen de mejor ve
 ## Notas y bloqueos
 
 - El selector de noches puede ser costoso; medir el tiempo de cálculo y, si supera 50 ms, memoizar por noche.
+
+## Registro de ejecución y desviaciones (2026-11-02)
+
+**Resultado.** Task ejecutada. La pantalla muestra el panel lunar, la mejor ventana, la lista de ventanas con avisos de proximidad lunar, el selector de umbral y el selector horizontal de las 18 noches con palabra, número, nubosidad media y lluvia probable.
+
+### Archivos creados
+
+- `src/lib/providers/AltitudeThresholdProvider.tsx`
+- `src/lib/types/altitude-threshold.types.ts`
+- `src/modules/night/hooks/use-night-options.ts`
+- `src/modules/night/utils/night-options.ts`
+- `src/modules/night/utils/night-selector.ts`
+- `src/modules/night/utils/moon-icon.ts`
+- `src/modules/night/utils/moon-icon.test.ts`
+- `src/modules/night/constants/altitude-threshold.constants.ts`
+- `src/modules/night/constants/object-labels.constants.ts`
+- `src/modules/night/components/MoonPanel.tsx`
+- `src/modules/night/components/ObservationWindows.tsx`
+- `src/modules/night/components/BestWindowSummary.tsx`
+- `src/modules/night/components/NightSelector.tsx`
+- `src/modules/night/components/AltitudeThresholdSelect.tsx`
+
+### Archivos modificados
+
+- `src/app/layout.tsx` — `AltitudeThresholdProvider` montado dentro de `Providers`.
+- `src/modules/night/components/NightContainer.tsx` — umbral del contexto, panel lunar, mejor ventana, ventanas, selector y `router.replace` de la noche.
+- `src/modules/night/types/night.types.ts` — `IUseNightOptionsInput`, avisos, altura máxima lunar y mapas de nubosidad.
+- `src/modules/night/hooks/use-night-analysis.ts` — `notices`, `moonPeakAltitudeDeg` y `moonPeakMs`.
+- `src/modules/night/constants/night.constants.ts` — retirada del umbral temporal.
+- `src/modules/night/components/NightSelector.tsx` — extremos seleccionables y bloqueo en la navegación del encabezado.
+
+### Decisiones y desviaciones
+
+1. **Archivos auxiliares autorizados.** Constantes, utilidades, tipos y pruebas necesarios para respetar `module-structure`; no se dejaron etiquetas ni cálculos dentro de los componentes.
+2. **Avisos de interferencia lunar.** `ObservationWindows` exige `notices`, pero `useNightAnalysis` no los calculaba. Se añadió `computeMoonInterferenceNotices` al análisis y `notices` a `INightAnalysis`, reutilizando la utilidad ya probada en T016. Sin este cambio el prop no tenía fuente.
+3. **Altura de la Luna.** `IMoonInfo` solo trae la posición a medianoche. Se ampliaron los props de `MoonPanel` con `peakAltitudeDeg` y `peakMs`, calculados con el muestreo de 10 minutos dentro de sunset→sunrise. También se admiten `nightStartMs`/`nightEndMs` nulos para mostrar «Sin noche astronómica este día» en latitudes polares en vez de «00:00 a 00:00».
+4. **Dependencias de `use-night-options`.** Además de `forecast` y `timeZone`, el `useMemo` depende de `slug` y `todayLocal`: sin ellos no se pueden resolver el observador ni el rango −3…+14. El cálculo sigue sin ejecutarse al cambiar de noche o de umbral.
+5. **Extremos del selector (corrección autorizada).** T022 pedía deshabilitar `options[0]` y `options[último]`, pero el SPEC §8.2 solo bloquea avanzar más allá de +14 y retroceder más allá de −3. Los 18 botones son seleccionables; «Anterior/Siguiente» se deshabilitan en los extremos. Verificado: −3 deshabilita «Anterior» y +14 deshabilita «Siguiente».
+6. **Rendimiento del selector (nota de la task).** La primera implementación tardaba 75–108 ms en desarrollo porque `filterHoursInWindow` recalculaba `parseLocalDateTime` para las 19 fechas en cada noche. Se precalcularon los instantes de las filas una sola vez; el cálculo bajó a **8–12 ms** en desarrollo, por debajo de los 50 ms que la task usa como umbral. No hizo falta memoizar por noche; se mantiene `useMemo`.
+7. **Icono lunar.** Se dibuja con una ruta SVG calculada a partir del `iconKey` y la iluminación. No se rota el icono ni se muestra el ángulo del limbo brillante, conforme al SPEC §8.4.
+8. **Selector de umbral.** Se implementó con `<select>` nativo, etiquetado y con objetivos táctiles de 44 px. El estado vive en el provider del layout, sin `localStorage` ni URL; al recargar vuelve a 15 (verificado).
+9. **Fecha visible en el selector.** Además de palabra, número, nubosidad media y lluvia, cada opción muestra la fecha abreviada para facilitar la orientación; no sustituye a ninguno de los datos exigidos.
+10. **El Sol no entra en las listas.** `computeObservationWindows` ya excluye al Sol; `ObservationWindows` solo pinta `windows` y `notices`. Verificado en la interfaz.
+
+### Verificación
+
+- `pnpm typecheck`, `pnpm lint` (solo el warning preexistente de `prettier.config.mjs`), `pnpm test` (26 archivos, 377 pruebas) y `pnpm build`: correctos.
+- Cambiar el umbral de 15° a 30° recalcula las ventanas y la mejor ventana: comprobado en navegador con el texto de la sección antes/después y **sin peticiones nuevas** a Open-Meteo.
+- Cambiar de noche actualiza `?date=` con `replace` y **no dispara peticiones**: contador de red de Open-Meteo idéntico antes y después.
+- Selector: 18 opciones, sin deshabilitadas, con etiquetas accesibles del tipo «Noche del lun, 2 nov: Excelente, 83 puntos, nubosidad media 9 %».
+- Extremos: −3 y +14 seleccionables; «Anterior» deshabilitado en −3 y «Siguiente» en +14.
+- Umbral tras recarga: `15 → 30 → recarga → 15`.
+- Panel lunar verificado con Bogotá: fase, icono, iluminación, salida, puesta, altura máxima y altura a medianoche.
+- Latitudes altas: en `85.00, 0.00` no aparecen ventanas ni horas y el panel lunar indica «Sin noche astronómica este día».
+- Captura comparada con la imagen de referencia en móvil y escritorio.

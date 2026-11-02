@@ -59,6 +59,10 @@ export interface IMoonInterferenceNotice {
   strong: boolean;
 }
 
+/** Darkness level derived from the geometric Sun altitude (SPEC §4). */
+export type TDarknessLevel =
+  'daylight' | 'nautical-twilight' | 'astronomical-twilight' | 'astronomical-night';
+
 /** Night quality word (SPEC §8.6): the border belongs to the better word. */
 export type TScoreLabel = 'excellent' | 'good' | 'fair' | 'bad';
 
@@ -107,6 +111,14 @@ export interface IUseNightAnalysisInput {
   nowMs: number | null;
 }
 
+export interface IUseNightOptionsInput {
+  slug: string;
+  forecast: IForecastResponse | undefined;
+  timeZone: string | null;
+  /** Local date of the place; `null` before hydration. */
+  todayLocal: string | null;
+}
+
 export interface INightAnalysis {
   nightDate: string;
   isArchived: boolean;
@@ -114,7 +126,17 @@ export interface INightAnalysis {
   window: TNightWindow;
   windows: IObservationWindow[];
   bestWindow: IObservationWindow | null;
+  /** Moon–planet proximity warnings of the selected night (SPEC §8.5.5). */
+  notices: IMoonInterferenceNotice[];
   moon: IMoonInfo | null;
+  /** Highest Moon altitude inside sunset→sunrise, from the 10-minute sampling. */
+  moonPeakAltitudeDeg: number | null;
+  moonPeakMs: number | null;
+  /** Sun altitude at the client clock instant, for the separate darkness indicator. */
+  currentSunAltitudeDeg: number | null;
   summary: INightSummary | null;
   sunAltitudes: Map<number, number>;
+  /** Weighted cloud cover per hourly row, keyed by the Open-Meteo `time` value. */
+  cloudByTime: ReadonlyMap<string, number | null>;
+  cloudClassByTime: ReadonlyMap<string, TCloudClass | 'unknown'>;
 }

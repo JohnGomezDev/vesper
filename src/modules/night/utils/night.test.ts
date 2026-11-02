@@ -74,6 +74,17 @@ describe('getNightWindow', () => {
       }),
     ).toEqual({ kind: 'no-astronomical-night' });
   });
+
+  it('rejects the 00:00 sentinel Open-Meteo uses during polar day and night', () => {
+    expect(
+      getNightWindow({
+        date: '2026-11-02',
+        sunset: '2026-11-02T00:00',
+        sunriseNext: '2026-11-03T00:00',
+        timeZone: 'Etc/GMT',
+      }),
+    ).toEqual({ kind: 'no-astronomical-night' });
+  });
 });
 
 describe('filterHoursInWindow', () => {

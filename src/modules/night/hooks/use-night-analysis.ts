@@ -33,7 +33,10 @@ import {
   getNightWindow,
 } from '@/modules/night/utils/night';
 import { getNightSummary } from '@/modules/night/utils/night-summary';
-import { computeObservationWindows } from '@/modules/night/utils/windows';
+import {
+  computeMoonInterferenceNotices,
+  computeObservationWindows,
+} from '@/modules/night/utils/windows';
 import { getDailySun, indexHourly } from '@/modules/weather/utils/hourly';
 
 /**
@@ -159,6 +162,37 @@ export function useNightAnalysis({
             elongationByObject,
           });
 
+    const notices =
+      samples.length === 0 ? [] : computeMoonInterferenceNotices({ samples, moonIlluminationPct });
+
+    const nightStartMs = window.kind === 'available' ? window.startMs + MS_PER_HOUR : null;
+    const nightEndMs = window.kind === 'available' ? window.endMs - MS_PER_HOUR : null;
+    let moonPeakAltitudeDeg: number | null = null;
+    let moonPeakMs: number | null = null;
+
+    if (nightStartMs !== null && nightEndMs !== null) {
+      for (const sample of samples) {
+        if (sample.instantMs < nightStartMs || sample.instantMs > nightEndMs) {
+          continue;
+        }
+
+        if (moonPeakAltitudeDeg === null || sample.moon.altitudeDeg > moonPeakAltitudeDeg) {
+          moonPeakAltitudeDeg = sample.moon.altitudeDeg;
+          moonPeakMs = sample.instantMs;
+        }
+      }
+    }
+
+    const cloudByTime = new Map<string, number | null>();
+    const cloudClassByTime = new Map<string, TCloudClass | 'unknown'>();
+
+    rows.forEach((row) => {
+      const value = computeCloudCover(row.cloudCoverLow, row.cloudCoverMid, row.cloudCoverHigh);
+
+      cloudByTime.set(row.time, value);
+      cloudClassByTime.set(row.time, value === null ? 'unknown' : classifyCloudCover(value));
+    });
+
     const bestWindow = pickBestWindow(windows, (candidate) => {
       const cloudValues: number[] = [];
 
@@ -205,9 +239,15 @@ export function useNightAnalysis({
       window,
       windows,
       bestWindow,
+      notices,
       moon,
+      moonPeakAltitudeDeg,
+      moonPeakMs,
+      currentSunAltitudeDeg: getSunPosition(observer, nowMs).altitudeDeg,
       summary,
       sunAltitudes,
+      cloudByTime,
+      cloudClassByTime,
     };
   }, [slug, date, threshold, forecast, nowMs]);
 }
