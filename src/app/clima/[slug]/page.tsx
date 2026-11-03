@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ROUTES } from '@/lib/constants/routes.constants';
 import {
   CURATED_CITIES,
   CURATED_SLUGS,
@@ -24,9 +25,11 @@ export function generateStaticParams(): Array<{ slug: string }> {
 }
 
 /**
- * Metadata comes only from the curated list and the slug (SPEC §7.1): it never
- * calls Open-Meteo. A non-curated slug is explicitly non-indexable. The
- * owner's `description` is omitted while it is still empty.
+ * Metadata comes only from the curated list and the slug (SPEC §7.1, §9): it
+ * never calls Open-Meteo. A non-curated slug is explicitly non-indexable. The
+ * owner's `description` is used when available; until it arrives, a unique
+ * metadata description derived from the city name replaces it without inventing
+ * the owner's «why observe here» text.
  */
 export async function generateMetadata({ params }: IClimaPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -37,8 +40,16 @@ export async function generateMetadata({ params }: IClimaPageProps): Promise<Met
   }
 
   const title = `${city.name} — Clima y observación astronómica`;
+  const description =
+    city.description === ''
+      ? `Clima y condiciones de observación astronómica esta noche en ${city.name}.`
+      : city.description;
 
-  return city.description === '' ? { title } : { title, description: city.description };
+  return {
+    title,
+    description,
+    alternates: { canonical: ROUTES.clima.detail(city.slug) },
+  };
 }
 
 /**

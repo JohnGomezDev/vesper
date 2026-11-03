@@ -587,6 +587,8 @@ Lista fija mantenida en el repositorio. Cada entrada contiene:
 
 Esas tres fichas (Tatacoa, Checua, Lago de Tota) las completa el dueño en el JSON, con coordenadas buscadas fuera de la API. El agente no las completa ni las aproxima con un homónimo.
 
+**Actualización 2026-11-03:** el dueño autorizó expresamente al agente a investigar y completar esas tres fichas. Las coordenadas, altitudes y fuentes quedaron registradas en T019 y en `curated-cities.ts`; no se usaron homónimos.
+
 Bogotá, Guatavita y Villa de Leyva sí aparecen como localidades en Colombia. Se pueden rellenar desde esa respuesta, eligiendo el resultado en Colombia, o escribirlas el dueño. En los dos casos el JSON es el que manda.
 
 - Alimentan: `generateStaticParams`, el sitemap, la metadata y el texto de cada página. No alimentan la redirección de `/`.

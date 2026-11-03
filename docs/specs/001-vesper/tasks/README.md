@@ -177,9 +177,9 @@ Las imágenes de referencia viven en [`../design/`](../design/README.md). Las ta
 | T021 | F7   | Bloque «Ahora» y tira horaria                          | T020                   | Terminada |
 | T022 | F7   | Luna, ventanas y selectores                            | T021                   | Terminada |
 | T023 | F7   | Estados, accesibilidad e hidratación                   | T022                   | Terminada |
-| T024 | F8   | SEO, sitemap, robots y noindex                         | T019                   | Pendiente |
-| T025 | F8   | Páginas legales                                        | T004                   | Pendiente |
-| T026 | F8   | Atribución, not-found y error                          | T004                   | Pendiente |
+| T024 | F8   | SEO, sitemap, robots y noindex                         | T019                   | Terminada |
+| T025 | F8   | Páginas legales                                        | T004                   | Terminada |
+| T026 | F8   | Atribución, not-found y error                          | T004                   | Terminada |
 | T027 | F9   | Aceptación §12 y comprobaciones de red                 | T023, T024, T025, T026 | Pendiente |
 | T028 | F9   | Casos límite, zonas horarias y contraste astronómico   | T027                   | Pendiente |
 | T029 | F9   | Despliegue en Vercel                                   | T027, T028             | Pendiente |

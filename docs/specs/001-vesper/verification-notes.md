@@ -1577,6 +1577,8 @@ El texto del SPEC §5.4 se ajustó para decir esto con precisión (la app pasa `
 
 **Método.** Relectura de §9 y §11 del SPEC. **No** se consultó ninguna fuente externa para rellenar coordenadas: el SPEC §9 prohíbe usar homónimos o aproximaciones, y la verificación de T001 ya confirmó que la geocodificación de Open-Meteo no devuelve esos tres sitios.
 
+**Actualización (2026-11-03).** El dueño autorizó al agente a buscar y completar las tres fichas. Se usaron OpenStreetMap (ODbL) y Wikipedia para los centros, y Open-Meteo para la altitud de referencia. El detalle y las fuentes están en T019.
+
 **Petición de datos al dueño — campos exactos por ciudad.** El JSON de la lista curada debe traer, por cada entrada, estos campos:
 
 | Campo         | Tipo     | Notas                                                                                                                                    |
@@ -1591,9 +1593,9 @@ El texto del SPEC §5.4 se ajustó para decir esto con precisión (la app pasa `
 
 Además de las tres ciudades de arriba, el dueño entrega el texto de las páginas legales `/terminos` y `/privacidad` (SPEC §2.1, §11).
 
-**Estado.** Tatacoa, Checua y Lago de Tota **siguen pendientes**. En este archivo **no figura ninguna coordenada, altitud ni zona horaria** de esas tres ciudades: no se han inventado ni aproximado. Bogotá, Guatavita y Villa de Leyva no son parte del bloqueo; el SPEC §9 permite sacarlas de la geocodificación o que las escriba el dueño, y en cualquier caso manda el JSON.
+**Estado (actualizado 2026-11-03).** Las tres fichas ya están en `CURATED_CITIES` con coordenadas redondeadas, altitud de referencia y zona horaria `America/Bogota`; las fuentes se documentan en T019. `description` sigue vacío porque el texto «por qué observar aquí» está pendiente. Bogotá, Guatavita y Villa de Leyva no son parte del bloqueo; el SPEC §9 permite sacarlas de la geocodificación o que las escriba el dueño, y en cualquier caso manda el JSON.
 
-**Conclusión.** El bloqueo de T019 y T025 en su parte de contenido se mantiene hasta que el dueño entregue estos campos y los textos legales.
+**Conclusión (actualizado 2026-11-03).** El bloqueo de datos de las tres ciudades quedó resuelto con la autorización del dueño; el bloqueo de los textos legales se cerró con el texto aprobado. Solo quedan pendientes los textos «por qué observar aquí».
 
 ---
 

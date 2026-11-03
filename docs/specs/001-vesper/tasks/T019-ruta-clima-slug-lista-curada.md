@@ -117,3 +117,17 @@ Implementar la página de servidor que valida el slug, prerenderiza ciudades cur
 ### Observación para T021/T022/T023
 
 El HTML estático de las curadas contiene el esqueleto, no el pronóstico, porque `NightContainer` espera a `useSearchParams` y al reloj de cliente antes de pintar. El SPEC §7.6 exige que el contenido estático se renderice en el HTML; queda para las tasks visuales.
+
+### Corrección posterior (2026-11-03)
+
+El dueño autorizó al agente a investigar y completar las tres fichas que faltaban. Se añadieron a `CURATED_CITIES`:
+
+| Slug                     | Nombre                 | Coordenadas  | Altitud | Fuente                                                                       |
+| ------------------------ | ---------------------- | ------------ | ------- | ---------------------------------------------------------------------------- |
+| `desierto-de-la-tatacoa` | Desierto de la Tatacoa | 3.25, -75.14 | 430 m   | Centro del polígono OSM 62753354; altitud de referencia documentada (~430 m) |
+| `desierto-de-checua`     | Desierto de Checua     | 5.15, -73.86 | 2730 m  | Centro del polígono OSM 1560244120; altitud de la celda de Open-Meteo        |
+| `lago-de-tota`           | Lago de Tota           | 5.54, -72.93 | 3015 m  | Relación OSM 1764506; altitud documentada                                    |
+
+Las tres usan `America/Bogota` y `description: ''` porque el texto «por qué observar aquí» sigue pendiente. El build pasa a seis curadas y seis peticiones de pronóstico; el sitemap pasa a seis entradas de clima. Las coordenadas están redondeadas a dos decimales como el resto.
+
+Verificación: `pnpm typecheck`, `pnpm lint`, `pnpm test` y `pnpm build` correctos; `/clima/desierto-de-la-tatacoa`, `/clima/desierto-de-checua` y `/clima/lago-de-tota` responden 200 y aparecen en `sitemap.xml` con sus títulos propios.
