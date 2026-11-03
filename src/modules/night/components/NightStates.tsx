@@ -21,8 +21,16 @@ export function NightStates({
   const role = variant === 'info' ? 'status' : 'alert';
 
   return (
-    <div className={`flex flex-col gap-2 rounded-lg border p-4 text-sm ${toneClass}`} role={role}>
-      <p>{message}</p>
+    <div
+      className={`flex flex-col gap-2 rounded-[4px] border p-3 text-xs ${toneClass}`}
+      role={role}
+    >
+      <p className="flex items-start gap-2">
+        <span aria-hidden="true" className="font-mono text-[10px]">
+          {variant === 'info' ? 'i' : '!'}
+        </span>
+        <span>{message}</span>
+      </p>
       {children}
     </div>
   );

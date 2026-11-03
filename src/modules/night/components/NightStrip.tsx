@@ -1,3 +1,4 @@
+import { HorizontalScroller } from '@/components/ui/HorizontalScroller';
 import { MS_PER_HOUR } from '@/modules/night/constants/night.constants';
 import { CloudLegend } from '@/modules/night/components/CloudLegend';
 import { HourlyBar } from '@/modules/night/components/HourlyBar';
@@ -34,22 +35,25 @@ export function NightStrip({
   return (
     <section
       aria-labelledby="night-strip-title"
-      className="border-border bg-surface flex flex-col gap-3 rounded-lg border p-4"
+      className="border-border bg-surface flex flex-col gap-4 rounded-[4px] border p-4"
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="border-border-subtle flex flex-wrap items-start justify-between gap-2 border-b pb-2">
         <div className="flex flex-col gap-1">
-          <h2 id="night-strip-title" className="text-base font-semibold">
-            Tira horaria de la noche
+          <p className="text-primary font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+            Tira horaria detallada
+          </p>
+          <h2 id="night-strip-title" className="text-foreground text-base font-semibold">
+            Nubosidad, viento y lluvia hora a hora
           </h2>
           {hasWindow ? (
-            <p className="text-muted text-xs">
+            <p className="text-muted font-mono text-[11px]">
               Puesta {formatLocalTime(window.startMs + MS_PER_HOUR, timeZone)} · Amanecer{' '}
               {formatLocalTime(window.endMs - MS_PER_HOUR, timeZone)} · horas locales
             </p>
           ) : null}
         </div>
         {isArchived ? (
-          <p className="border-warning/40 bg-warning/10 text-warning rounded-md border px-2 py-1 text-xs font-semibold">
+          <p className="border-warning/50 bg-warning/10 text-warning rounded-none border px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
             Pronóstico archivado
           </p>
         ) : null}
@@ -62,13 +66,8 @@ export function NightStrip({
           Sin horas disponibles en la tira visible de esta noche.
         </p>
       ) : (
-        <div
-          role="region"
-          aria-label="Tira horaria desplazable"
-          tabIndex={0}
-          className="focus-visible:ring-primary focus-visible:ring-offset-background overflow-x-auto pb-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-        >
-          <ul className="flex min-w-full gap-2">
+        <HorizontalScroller ariaLabel="Tira horaria" trackClassName="pb-1">
+          <ul className="flex w-max min-w-full gap-2">
             {rows.map((row) => {
               const instantMs = parseLocalDateTime(row.time, timeZone);
               const isMargin =
@@ -77,7 +76,7 @@ export function NightStrip({
                 (instantMs < nightStartMs || instantMs >= nightEndMs);
 
               return (
-                <li key={row.time} className="flex">
+                <li key={row.time} className="flex shrink-0">
                   <HourlyBar
                     row={row}
                     cloud={cloudByTime.get(row.time) ?? null}
@@ -89,7 +88,7 @@ export function NightStrip({
               );
             })}
           </ul>
-        </div>
+        </HorizontalScroller>
       )}
     </section>
   );

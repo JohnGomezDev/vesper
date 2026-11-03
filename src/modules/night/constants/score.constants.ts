@@ -69,3 +69,11 @@ export const SCORE_LABEL_TEXT: Record<TScoreLabel, string> = {
   fair: 'Regular',
   bad: 'Mala',
 };
+
+/** Visual treatment of the night quality word in the selector (design reference). */
+export const SCORE_LABEL_CLASSES: Record<TScoreLabel, string> = {
+  excellent: 'bg-primary text-primary-foreground',
+  good: 'bg-cloud-good/20 text-cloud-good',
+  fair: 'bg-cloud-fair/15 text-cloud-fair',
+  bad: 'bg-danger/15 text-danger',
+};

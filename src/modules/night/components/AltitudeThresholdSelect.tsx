@@ -17,14 +17,17 @@ export function AltitudeThresholdSelect({
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <label htmlFor="altitude-threshold" className="text-muted text-xs font-medium">
+      <label
+        htmlFor="altitude-threshold"
+        className="text-muted font-mono text-[9px] font-medium tracking-[0.14em] uppercase"
+      >
         Altitud mínima de observación
       </label>
       <select
         id="altitude-threshold"
         value={value}
         onChange={handleChange}
-        className="border-border bg-surface text-foreground focus-visible:border-primary focus-visible:ring-primary/40 min-h-11 rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+        className="border-border bg-surface-raised text-primary focus-visible:border-primary focus-visible:ring-primary/40 h-9 rounded-none border px-3 font-mono text-sm focus-visible:ring-2 focus-visible:outline-none"
       >
         {ALTITUDE_THRESHOLD_VALUES.map((threshold) => (
           <option key={threshold} value={threshold}>
@@ -32,7 +35,6 @@ export function AltitudeThresholdSelect({
           </option>
         ))}
       </select>
-      <span className="text-muted text-[11px]">Se recalcula en local, sin nuevas peticiones.</span>
     </div>
   );
 }

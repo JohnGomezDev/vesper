@@ -8,7 +8,7 @@ export function AppBrand({ className }: IAppBrandProps): React.JSX.Element {
     <div className={`flex items-center gap-2 ${className ?? ''}`} aria-label="Vesper">
       <span
         aria-hidden="true"
-        className="border-border bg-surface text-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md border"
+        className="bg-primary text-primary-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-full"
       >
         <svg
           viewBox="0 0 24 24"
@@ -28,7 +28,9 @@ export function AppBrand({ className }: IAppBrandProps): React.JSX.Element {
           <circle cx="12" cy="13" r="2" />
         </svg>
       </span>
-      <span className="text-foreground text-base font-semibold tracking-tight">Vesper</span>
+      <span className="text-foreground font-display text-lg font-semibold tracking-tight">
+        Vesper
+      </span>
     </div>
   );
 }

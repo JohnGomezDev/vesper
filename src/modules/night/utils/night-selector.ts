@@ -17,3 +17,14 @@ export function describeNightOption(option: INightSummary): string {
 
   return `Noche del ${dateLabel}: ${SCORE_LABEL_TEXT[option.label]}, ${Math.round(option.score)} puntos, ${cloudLabel}${option.rainLikely ? ', lluvia probable' : ''}`;
 }
+
+/** Relative label of a selector position: today is index 3 (−3…+14, SPEC §8.2). */
+export function formatNightOffset(index: number): string {
+  const offset = index - 3;
+
+  if (offset === 0) {
+    return 'Hoy';
+  }
+
+  return offset < 0 ? `${offset}d` : `+${offset}d`;
+}

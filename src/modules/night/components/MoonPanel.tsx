@@ -36,9 +36,12 @@ export function MoonPanel({
     return (
       <section
         aria-labelledby="moon-panel-title"
-        className="border-border bg-surface rounded-lg border p-4"
+        className="border-border bg-surface-raised rounded-[4px] border p-4"
       >
-        <h2 id="moon-panel-title" className="text-base font-semibold">
+        <p className="text-primary font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+          Información lunar
+        </p>
+        <h2 id="moon-panel-title" className="text-foreground mt-1 text-sm font-semibold">
           Luna
         </h2>
         <p className="text-muted mt-2 text-sm">Sin datos de Luna.</p>
@@ -60,13 +63,18 @@ export function MoonPanel({
   return (
     <section
       aria-labelledby="moon-panel-title"
-      className="border-border bg-surface flex flex-col gap-4 rounded-lg border p-4"
+      className="border-border bg-surface-raised flex flex-col gap-4 rounded-[4px] border p-4"
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="moon-panel-title" className="text-base font-semibold">
-          Luna
-        </h2>
-        <p className="text-muted text-xs">
+      <div className="border-border-subtle flex flex-wrap items-start justify-between gap-2 border-b pb-2">
+        <div className="flex flex-col gap-1">
+          <p className="text-primary font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+            Información lunar
+          </p>
+          <h2 id="moon-panel-title" className="text-foreground text-base font-semibold">
+            Luna de esta noche
+          </h2>
+        </div>
+        <p className="text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
           {hasNightWindow
             ? `Noche de ${formatLocalTime(nightStartMs, timeZone)} a ${formatLocalTime(nightEndMs, timeZone)}`
             : 'Sin noche astronómica este día'}
@@ -80,43 +88,41 @@ export function MoonPanel({
           aria-label={`Icono de ${phaseLabel}`}
           className="size-16 shrink-0"
         >
-          <circle
-            cx="32"
-            cy="32"
-            r="28"
-            className="fill-surface-muted stroke-border"
-            strokeWidth="1"
-          />
+          <circle cx="32" cy="32" r="28" className="fill-surface stroke-border" strokeWidth="1" />
           {iconPath === '' ? null : <path d={iconPath} className="fill-moon" />}
         </svg>
         <div className="min-w-0">
-          <p className="text-foreground text-sm font-semibold">{phaseLabel}</p>
-          <p className="text-muted font-mono text-xs">
+          <p className="text-foreground text-base font-semibold">{phaseLabel}</p>
+          <p className="text-primary font-mono text-xs">
             {formatPercent(illuminationPct)} iluminación
           </p>
         </div>
       </div>
 
       <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <div>
-          <dt className="text-muted text-xs">Salida</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">Salida</dt>
           <dd className="text-foreground font-mono">{riseLabel}</dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Puesta</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">Puesta</dt>
           <dd className="text-foreground font-mono">{setLabel}</dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Altura máxima</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Altura máxima
+          </dt>
           <dd className="text-foreground font-mono">{peakLabel}</dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Altura a medianoche</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Altura a medianoche
+          </dt>
           <dd className="text-foreground font-mono">{formatDegrees(moon.position.altitudeDeg)}</dd>
         </div>
       </dl>
 
-      <p className="text-muted text-[11px]">
+      <p className="text-muted text-[10px]">
         La altura máxima se estima con el muestreo de 10 minutos dentro de la noche.
       </p>
     </section>

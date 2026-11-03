@@ -38,14 +38,18 @@ export function HourlyBar({
   return (
     <article
       aria-label={`Hora ${hourLabel}${marginLabel}`}
-      className={`flex min-w-[9.5rem] flex-1 flex-col gap-3 rounded-md border p-3 ${
-        isMargin ? 'border-border/70 bg-surface-muted/40 border-dashed' : 'border-border bg-surface'
+      className={`flex w-[10.5rem] shrink-0 flex-col gap-3 rounded-[4px] border p-2.5 ${
+        isMargin
+          ? 'border-border-subtle bg-surface-muted/30 border-dashed'
+          : 'border-border bg-surface-raised'
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-foreground font-mono text-sm font-semibold">{hourLabel}</h3>
+        <h3 className="text-foreground font-mono text-xs font-semibold tracking-wide">
+          {hourLabel}
+        </h3>
         {isMargin ? (
-          <span className="border-border text-muted rounded border px-1.5 py-0.5 text-[10px] font-medium">
+          <span className="border-primary/40 bg-primary/10 text-primary rounded-none border px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-[0.1em] uppercase">
             Margen
           </span>
         ) : null}
@@ -53,54 +57,59 @@ export function HourlyBar({
 
       <div className="flex flex-col gap-1">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="text-muted text-[11px]">Nubosidad</span>
-          <span className={`text-xs font-semibold ${CLOUD_CLASS_TEXT_CLASSES[cloudClass]}`}>
+          <span className="text-muted font-mono text-[9px] font-medium tracking-[0.12em] uppercase">
+            Nubosidad
+          </span>
+          <span
+            className={`font-mono text-[10px] font-semibold tracking-[0.08em] uppercase ${CLOUD_CLASS_TEXT_CLASSES[cloudClass]}`}
+          >
             {classLabel}
           </span>
         </div>
-        <div
-          aria-hidden="true"
-          className="bg-surface-muted h-2 w-full overflow-hidden rounded-full"
-        >
+        <div aria-hidden="true" className="bg-surface-muted h-1.5 w-full overflow-hidden">
           <div
-            className={`h-full rounded-full ${CLOUD_CLASS_BACKGROUND_CLASSES[cloudClass]}`}
+            className={`h-full ${CLOUD_CLASS_BACKGROUND_CLASSES[cloudClass]}`}
             style={{ width: `${Math.min(100, Math.max(0, cloud ?? 0))}%` }}
           />
         </div>
-        <p className="text-foreground font-mono text-xs">
+        <p className="text-foreground font-mono text-[11px]">
           {formatPercent(cloud, 1)} <span className="text-muted font-sans">ponderada</span>
         </p>
-        <p className="text-muted text-[11px]">
+        <p className="text-muted font-mono text-[10px]">
           Baja {formatPercent(row.cloudCoverLow)} · Media {formatPercent(row.cloudCoverMid)} · Alta{' '}
           {formatPercent(row.cloudCoverHigh)}
         </p>
       </div>
 
-      <dl className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-        <div>
-          <dt className="text-muted">Visibilidad</dt>
+      <dl className="flex flex-col text-[10px]">
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">
+            Visibilidad
+          </dt>
           <dd className="text-foreground font-mono">{formatVisibility(row.visibility)}</dd>
         </div>
-        <div>
-          <dt className="text-muted">Humedad</dt>
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">Humedad</dt>
           <dd className="text-foreground font-mono">{formatHumidity(row.relativeHumidity)}</dd>
         </div>
-        <div>
-          <dt className="text-muted">Temp/rocío</dt>
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">
+            Temp/rocío
+          </dt>
           <dd className="text-foreground font-mono">
             {formatDewPointSpread(row.temperature, row.dewPoint)}
           </dd>
         </div>
-        <div>
-          <dt className="text-muted">Viento</dt>
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">Viento</dt>
           <dd className="text-foreground font-mono">{formatWindSpeed(row.windSpeed)}</dd>
         </div>
-        <div>
-          <dt className="text-muted">Ráfagas</dt>
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">Ráfagas</dt>
           <dd className="text-foreground font-mono">{formatWindSpeed(row.windGusts)}</dd>
         </div>
-        <div>
-          <dt className="text-muted">Lluvia</dt>
+        <div className="border-border-subtle flex items-center justify-between gap-2 border-t py-1">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.08em] uppercase">Lluvia</dt>
           <dd className="text-foreground font-mono">
             {formatPercent(row.precipitationProbability)} · {formatPrecipitation(row.precipitation)}
           </dd>

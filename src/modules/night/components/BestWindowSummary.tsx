@@ -24,11 +24,16 @@ export function BestWindowSummary({
     return (
       <section
         aria-labelledby="best-window-title"
-        className="border-border bg-surface rounded-lg border p-4"
+        className="border-border bg-surface rounded-[4px] border p-4"
       >
-        <h2 id="best-window-title" className="text-base font-semibold">
-          Mejor ventana
-        </h2>
+        <div className="flex flex-col gap-1">
+          <p className="text-primary font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+            Recomendación primaria
+          </p>
+          <h2 id="best-window-title" className="text-foreground text-base font-semibold">
+            Mejor ventana
+          </h2>
+        </div>
         <p className="text-muted mt-2 text-sm">Sin ventana esta noche.</p>
       </section>
     );
@@ -43,41 +48,57 @@ export function BestWindowSummary({
   return (
     <section
       aria-labelledby="best-window-title"
-      className="border-primary/40 bg-primary/5 flex flex-col gap-3 rounded-lg border p-4"
+      className="border-primary/50 bg-primary/[0.04] flex flex-col gap-3 rounded-[4px] border p-4"
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="best-window-title" className="text-base font-semibold">
-          Mejor ventana
-        </h2>
-        <p className="text-foreground text-sm font-semibold">{objectLabel}</p>
+      <div className="border-border-subtle flex flex-wrap items-start justify-between gap-2 border-b pb-2">
+        <div className="flex flex-col gap-1">
+          <p className="text-primary font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+            Recomendación primaria
+          </p>
+          <h2 id="best-window-title" className="text-foreground text-base font-semibold">
+            Mejor ventana
+          </h2>
+        </div>
+        <p className="text-primary font-mono text-sm font-semibold">{objectLabel}</p>
       </div>
 
-      <p className="text-foreground font-mono text-sm">
-        {startLabel} a {endLabel} · {formatDuration(bestWindow.endMs - bestWindow.startMs)}
+      <p className="text-foreground font-mono text-2xl font-semibold tracking-tight">
+        {startLabel} – {endLabel}
+      </p>
+      <p className="text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+        Duración {formatDuration(bestWindow.endMs - bestWindow.startMs)}
       </p>
 
       <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <div>
-          <dt className="text-muted text-xs">Altitud máxima</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Altitud máxima
+          </dt>
           <dd className="text-foreground font-mono">{formatDegrees(bestWindow.peakAltitudeDeg)}</dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Culminación</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Culminación
+          </dt>
           <dd className="text-foreground font-mono">
             {culminationLabel}
             {bestWindow.culminationApproximate ? ' aprox.' : ''}
           </dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Peor nubosidad</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Peor nubosidad
+          </dt>
           <dd
             className={`font-mono text-sm ${CLOUD_CLASS_TEXT_CLASSES[bestWindow.worstCloudClass]}`}
           >
             {cloudLabel}
           </dd>
         </div>
-        <div>
-          <dt className="text-muted text-xs">Visibilidad</dt>
+        <div className="border-border-subtle border-t pt-2">
+          <dt className="text-muted font-mono text-[9px] tracking-[0.12em] uppercase">
+            Visibilidad
+          </dt>
           <dd className="text-foreground font-mono">
             {BRIGHTNESS_LABELS_ES[bestWindow.brightnessLabel]}
           </dd>

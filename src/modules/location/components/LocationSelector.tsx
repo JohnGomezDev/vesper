@@ -22,7 +22,9 @@ export function LocationSelector({
 
   return (
     <nav aria-label="Ciudades curadas" className="flex flex-wrap items-center gap-2">
-      <span className="text-muted text-xs font-medium tracking-wide uppercase">Ciudades</span>
+      <span className="text-muted font-mono text-xs font-medium tracking-wide uppercase">
+        Ciudades
+      </span>
       <ul className="flex flex-wrap items-center gap-1">
         {CURATED_CITIES.map((city) => {
           const isCurrent = city.slug === currentSlug;

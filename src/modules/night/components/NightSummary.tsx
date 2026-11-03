@@ -12,13 +12,13 @@ export function NightSummary({ analysis }: INightSummaryProps): React.JSX.Elemen
   return (
     <section
       aria-labelledby="night-summary-title"
-      className="border-border bg-surface flex flex-col gap-2 rounded-lg border p-4"
+      className="border-border bg-surface flex flex-col gap-2 rounded-[4px] border p-4"
     >
       <h2 id="night-summary-title" className="text-base font-semibold">
         Noche del {analysis.nightDate}
       </h2>
       {analysis.isArchived ? (
-        <p className="text-muted text-xs font-medium tracking-wide uppercase">
+        <p className="text-muted font-mono text-xs font-medium tracking-wide uppercase">
           Pronóstico archivado
         </p>
       ) : null}

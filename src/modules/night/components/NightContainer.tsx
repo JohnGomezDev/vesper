@@ -33,11 +33,13 @@ import { NightStates } from '@/modules/night/components/NightStates';
 import { NightStrip } from '@/modules/night/components/NightStrip';
 import { ObservationWindows } from '@/modules/night/components/ObservationWindows';
 import { MS_PER_HOUR, NIGHT_MESSAGES } from '@/modules/night/constants/night.constants';
+import { SCORE_LABEL_CLASSES, SCORE_LABEL_TEXT } from '@/modules/night/constants/score.constants';
 import { useNightAnalysis } from '@/modules/night/hooks/use-night-analysis';
 import { useNightNavigation } from '@/modules/night/hooks/use-night-navigation';
 import { useNightOptions } from '@/modules/night/hooks/use-night-options';
 import { useNow } from '@/modules/night/hooks/use-now';
 import type { TValidSlug } from '@/modules/night/types/night.types';
+import { formatNightDateLabel } from '@/modules/night/utils/format';
 import { getMoonPhaseIconKey, getMoonPhaseName } from '@/modules/night/utils/moon-phase';
 import { CurrentConditions } from '@/modules/weather/components/CurrentConditions';
 import { FORECAST_STALE_TIME_MS } from '@/modules/weather/constants/weather.constants';
@@ -111,6 +113,8 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
 
   const moonPhase = analysis.moon === null ? 'new-moon' : getMoonPhaseName(analysis.moon.angleDeg);
   const moonIconKey = getMoonPhaseIconKey(moonPhase);
+  const scoreLabel = analysis.summary?.label ?? null;
+  const scoreValue = analysis.summary?.score ?? null;
   const moonNightStartMs =
     analysis.window.kind === 'available' ? analysis.window.startMs + MS_PER_HOUR : null;
   const moonNightEndMs =
@@ -134,53 +138,92 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
 
   return (
     <>
-      <header className="border-border bg-background/95 sticky top-0 z-10 border-b backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <AppBrand />
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-0 sm:flex-1">
-              <SearchForm key={`${slug}-${searchResetToken}`} />
+      <header className="border-border-subtle bg-background sticky top-0 z-20 border-b">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-2.5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div className="flex justify-center md:shrink-0 md:justify-start">
+              <AppBrand />
             </div>
-            <UseMyLocationButton onBeforeRequest={resetSearch} />
+            <div className="flex w-full flex-col gap-2 md:ml-auto md:w-auto md:flex-row md:items-center md:justify-end">
+              <div className="flex w-full flex-col gap-2 md:w-[22rem] lg:w-[30rem]">
+                <SearchForm key={`${slug}-${searchResetToken}`} />
+              </div>
+              <UseMyLocationButton onBeforeRequest={resetSearch} />
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-hidden px-4 py-6 [contain:paint]">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-foreground truncate text-xl font-semibold tracking-tight">
-              {locationName}
-            </h1>
-            {showTimeZoneNotice ? (
-              <p className="text-muted mt-1 text-xs">
-                Horas locales de {locationName} · {timeZone}
-              </p>
-            ) : null}
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden px-4 py-5 [contain:paint]">
+        <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-[4px] border p-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="border-primary/40 bg-primary/10 text-primary inline-flex size-9 shrink-0 items-center justify-center rounded-none border">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="size-4"
+                >
+                  <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+              </span>
+              <div className="min-w-0">
+                <h1 className="text-foreground truncate text-xl font-semibold tracking-tight">
+                  {locationName}
+                </h1>
+                <p className="text-muted mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase">
+                  {coordinates.latitude.toFixed(2)}°, {coordinates.longitude.toFixed(2)}°
+                  {forecast === undefined ? '' : ` · ${Math.round(forecast.elevation)} m`}
+                </p>
+                {showTimeZoneNotice ? (
+                  <p className="text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+                    Zona horaria del lugar · {timeZone}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
             {mounted && forecast !== undefined && timeZone !== null && forecastUpdatedAt > 0 ? (
-              <p className="text-muted mt-1 text-xs" role="status">
-                Actualizado a las {formatLocalTime(forecastUpdatedAt, timeZone)}
-                {forecastQuery.isFetching ? ' · actualizando…' : ''}
-              </p>
+              <div
+                className="border-border-subtle bg-background flex items-center gap-2 rounded-none border px-2.5 py-1.5"
+                role="status"
+              >
+                <span aria-hidden="true" className="bg-primary size-1" />
+                <span className="text-muted font-mono text-[10px]">
+                  Actualizado a las {formatLocalTime(forecastUpdatedAt, timeZone)}
+                  {forecastQuery.isFetching ? ' · actualizando…' : ''}
+                </span>
+              </div>
             ) : null}
           </div>
 
           {mounted ? (
-            <div className="flex items-center gap-1" aria-label="Cambiar de noche">
+            <div
+              className="border-border bg-surface flex items-center gap-1 rounded-[4px] border p-2"
+              aria-label="Cambiar de noche"
+            >
               <button
                 type="button"
                 onClick={() => changeNight(previousDate)}
                 disabled={!canGoPrevious}
-                className="border-border bg-surface text-foreground hover:bg-surface-muted focus-visible:ring-primary focus-visible:ring-offset-background min-h-11 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+                className="border-border bg-surface-raised text-foreground hover:border-foreground hover:text-foreground focus-visible:ring-primary focus-visible:ring-offset-background min-h-9 rounded-none border px-2.5 py-1 font-mono text-[10px] font-semibold tracking-[0.08em] uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30 motion-reduce:transition-none"
               >
                 Anterior
               </button>
-              <span className="text-muted px-1 font-mono text-xs">{analysis.nightDate}</span>
+              <span className="text-primary px-1 font-mono text-[10px]">
+                {formatNightDateLabel(analysis.nightDate)}
+              </span>
               <button
                 type="button"
                 onClick={() => changeNight(nextDate)}
                 disabled={!canGoNext}
-                className="border-border bg-surface text-foreground hover:bg-surface-muted focus-visible:ring-primary focus-visible:ring-offset-background min-h-11 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+                className="border-border bg-surface-raised text-foreground hover:border-foreground hover:text-foreground focus-visible:ring-primary focus-visible:ring-offset-background min-h-9 rounded-none border px-2.5 py-1 font-mono text-[10px] font-semibold tracking-[0.08em] uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30 motion-reduce:transition-none"
               >
                 Siguiente
               </button>
@@ -203,7 +246,7 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
           <EmptyState message={NIGHT_MESSAGES.emptyForecast}>
             <a
               href="#location-search"
-              className="bg-primary text-primary-foreground focus-visible:ring-primary focus-visible:ring-offset-background inline-flex min-h-11 items-center rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              className="bg-primary text-primary-foreground focus-visible:ring-primary focus-visible:ring-offset-background inline-flex min-h-11 items-center rounded-none px-4 py-2 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               Buscar otro lugar
             </a>
@@ -243,7 +286,7 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
                 <button
                   type="button"
                   onClick={retryCurrent}
-                  className="border-border bg-surface text-foreground hover:bg-surface-muted focus-visible:ring-primary focus-visible:ring-offset-background min-h-11 w-fit rounded-md border px-3 text-xs font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  className="border-border bg-surface-raised text-foreground hover:border-foreground hover:text-foreground focus-visible:ring-primary focus-visible:ring-offset-background min-h-11 w-fit rounded-none border px-3 font-mono text-[10px] font-semibold tracking-[0.1em] uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
                 >
                   Reintentar
                 </button>
@@ -253,9 +296,31 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
             )}
 
             <section aria-labelledby="night-section-title" className="flex flex-col gap-4">
-              <h2 id="night-section-title" className="text-base font-semibold">
-                Esta noche
-              </h2>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-primary font-mono text-[10px] font-semibold">*</span>
+                  <div className="flex flex-col gap-0.5">
+                    <h2 id="night-section-title" className="text-foreground text-lg font-semibold">
+                      Noche seleccionada
+                    </h2>
+                    <p className="text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+                      {formatNightDateLabel(analysis.nightDate)}
+                    </p>
+                  </div>
+                </div>
+
+                {scoreLabel !== null && scoreValue !== null ? (
+                  <span
+                    className={`rounded-none px-2 py-1 font-mono text-[9px] font-semibold tracking-[0.12em] uppercase ${SCORE_LABEL_CLASSES[scoreLabel]}`}
+                  >
+                    {SCORE_LABEL_TEXT[scoreLabel]} · {Math.round(scoreValue)} pts
+                  </span>
+                ) : (
+                  <span className="border-border text-muted rounded-none border px-2 py-1 font-mono text-[9px] font-semibold tracking-[0.12em] uppercase">
+                    Sin noche astronómica
+                  </span>
+                )}
+              </div>
 
               <NightStrip
                 rows={analysis.rows}
@@ -266,30 +331,33 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
                 isArchived={analysis.isArchived}
               />
 
-              <BestWindowSummary window={analysis.bestWindow} timeZone={timeZone} />
+              <div className="grid gap-4 lg:grid-cols-2">
+                <BestWindowSummary window={analysis.bestWindow} timeZone={timeZone} />
 
-              <MoonPanel
-                moon={analysis.moon}
-                phase={moonPhase}
-                iconKey={moonIconKey}
-                illuminationPct={
-                  analysis.moon === null ? 0 : analysis.moon.illuminationFraction * 100
-                }
-                timeZone={timeZone}
-                nightStartMs={moonNightStartMs}
-                nightEndMs={moonNightEndMs}
-                peakAltitudeDeg={analysis.moonPeakAltitudeDeg}
-                peakMs={analysis.moonPeakMs}
-              />
-
-              <div className="border-border bg-surface flex flex-col gap-4 rounded-lg border p-4">
-                <AltitudeThresholdSelect value={threshold} onChange={setThreshold} />
-                <ObservationWindows
-                  windows={analysis.windows}
-                  notices={analysis.notices}
+                <MoonPanel
+                  moon={analysis.moon}
+                  phase={moonPhase}
+                  iconKey={moonIconKey}
+                  illuminationPct={
+                    analysis.moon === null ? 0 : analysis.moon.illuminationFraction * 100
+                  }
                   timeZone={timeZone}
+                  nightStartMs={moonNightStartMs}
+                  nightEndMs={moonNightEndMs}
+                  peakAltitudeDeg={analysis.moonPeakAltitudeDeg}
+                  peakMs={analysis.moonPeakMs}
                 />
               </div>
+
+              <div className="border-border bg-surface rounded-[4px] border p-3">
+                <AltitudeThresholdSelect value={threshold} onChange={setThreshold} />
+              </div>
+
+              <ObservationWindows
+                windows={analysis.windows}
+                notices={analysis.notices}
+                timeZone={timeZone}
+              />
             </section>
 
             <NightSelector
@@ -315,7 +383,7 @@ export function NightContainer({ slug, initialData }: INightContainerProps): Rea
 
   if (parsedSlug.kind === 'invalid') {
     return (
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-8">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 px-4 py-8">
         <p className="text-muted text-sm">La ubicación de este enlace no es válida.</p>
       </main>
     );

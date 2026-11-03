@@ -78,12 +78,25 @@ export function SearchForm(): React.JSX.Element {
   };
 
   return (
-    <div ref={containerRef} className="flex w-full flex-col gap-2">
+    <div ref={containerRef} className="relative flex w-full flex-col gap-2">
       <form onSubmit={onSubmit} noValidate className="flex w-full items-start gap-2">
-        <div className="min-w-0 flex-1">
+        <div className="relative min-w-0 flex-1">
           <label htmlFor="location-search" className="sr-only">
             Buscar un lugar
           </label>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="text-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
           <input
             id="location-search"
             type="search"
@@ -91,14 +104,14 @@ export function SearchForm(): React.JSX.Element {
             placeholder="Busca una ciudad o un pueblo"
             aria-invalid={errors.query !== undefined}
             aria-describedby={errors.query === undefined ? undefined : 'location-search-error'}
-            className="border-border bg-surface text-foreground placeholder:text-muted focus-visible:border-primary focus-visible:ring-primary/40 h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+            className="border-muted bg-surface-muted text-foreground placeholder:text-muted focus-visible:border-primary focus-visible:ring-primary/40 h-9 w-full rounded-none border pr-3 pl-9 font-mono text-sm focus-visible:ring-2 focus-visible:outline-none"
             {...registerQuery}
           />
         </div>
         <button
           type="submit"
           disabled={isSearching}
-          className="bg-primary text-primary-foreground focus-visible:ring-primary focus-visible:ring-offset-background h-10 shrink-0 rounded-md px-4 text-sm font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-primary text-primary-foreground focus-visible:ring-primary focus-visible:ring-offset-background hover:text-primary-foreground h-9 shrink-0 rounded-none px-4 font-mono text-[10px] font-semibold tracking-[0.14em] uppercase transition-opacity hover:bg-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
         >
           {isSearching ? 'Buscando…' : 'Buscar'}
         </button>
@@ -123,7 +136,7 @@ export function SearchForm(): React.JSX.Element {
       {isResultsOpen && results.length > 0 ? (
         <ul
           aria-label="Resultados de búsqueda"
-          className="border-border bg-surface divide-border max-h-72 divide-y overflow-y-auto rounded-md border shadow-sm"
+          className="border-border bg-surface-raised divide-border-subtle absolute top-full right-0 left-0 z-50 mt-1 max-h-72 divide-y overflow-y-auto rounded-[4px] border"
         >
           {results.map((result) => {
             const description = formatGeocodingResultDescription(result);
