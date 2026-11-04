@@ -5,6 +5,7 @@ description: Use when creating or editing React components or pages in Vesper â€
 
 # Component Patterns
 
+- File placement follows the `module-structure` skill: no domain constants, non-Props types, or pure helpers inside a component.
 - No business logic inside components besides from hooks calls.
 
 **Rule**: push `'use client'` as far down the tree as possible. A page can be a Server Component that imports one small Client Component leaf â€” that is the preferred pattern.
@@ -13,19 +14,16 @@ description: Use when creating or editing React components or pages in Vesper â€
 
 ```tsx
 // /src/modules/test/components/TestCard.tsx
-"use client"; // only if needed
+'use client'; // only if needed
 
-import type { ITest } from "../types/test.types";
+import type { ITest } from '../types/test.types';
 
 interface ITestCardProps {
   test: ITest;
   className?: string;
 }
 
-export function TestCard({
-  test,
-  className,
-}: ITestCardProps): React.JSX.Element {
+export function TestCard({ test, className }: ITestCardProps): React.JSX.Element {
   return (
     <div className={className}>
       <h2>{test.title}</h2>
@@ -75,9 +73,9 @@ Page files are thin shells. They own the route, set metadata, and compose module
 
 ```tsx
 // /src/app/page.tsx
-import { TestListContainer } from "@/modules/test/components/TestListContainer";
+import { TestListContainer } from '@/modules/test/components/TestListContainer';
 
-export const metadata = { title: "Test" };
+export const metadata = { title: 'Test' };
 
 export default function TestPage(): React.JSX.Element {
   return <TestListContainer />;

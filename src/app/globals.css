@@ -1,26 +1,98 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #040404;
+  --foreground: #ffffff;
+  --surface: #0c0d0e;
+  --surface-raised: #131516;
+  --surface-muted: #090a0b;
+  --muted: #b9c0c4;
+  --border: #b9c0c42e;
+  --border-subtle: #b9c0c41f;
+  --outline: #989177;
+  --outline-variant: #4c4732;
+  --primary: #ffdb00;
+  --primary-foreground: #040404;
+  --danger: #ffb4ab;
+  --danger-foreground: #690005;
+  --warning: #ffdb00;
+  --warning-foreground: #040404;
+  --moon: #ffdb00;
+  --cloud-ideal: #ffdb00;
+  --cloud-good: #c3a803;
+  --cloud-acceptable: #8b7807;
+  --cloud-fair: #b47f79;
+  --cloud-poor: #ffb4ab;
+  --cloud-unknown: #b9c0c4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-moon: var(--moon);
+  --color-cloud-ideal: var(--cloud-ideal);
+  --color-cloud-good: var(--cloud-good);
+  --color-cloud-acceptable: var(--cloud-acceptable);
+  --color-cloud-fair: var(--cloud-fair);
+  --color-cloud-poor: var(--cloud-poor);
+  --color-cloud-unknown: var(--cloud-unknown);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
