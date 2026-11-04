@@ -4,7 +4,7 @@
 - **SPEC:** §3, §6.1
 - **Depende de:** T027, T028
 - **Desbloquea:** —
-- **Estado:** Pendiente de despliegue manual del dueño (preparación completada 2026-11-04)
+- **Estado:** Terminada (2026-11-04; con salvedad en la medición temporal de la regeneración)
 
 ## Objetivo
 
@@ -54,12 +54,12 @@ La app está desplegada en Vercel, `/` redirige con 307 usando las cabeceras rea
 
 ## Criterios de aceptación
 
-- [ ] `/` responde 307 y usa las cabeceras de IP reales.
-- [ ] Sin cabeceras, redirige a Bogotá.
-- [ ] El GPS funciona por HTTPS.
-- [ ] La regeneración respeta 3600 s.
-- [ ] La atribución es visible en producción.
-- [ ] README y `acceptance.md` reflejan la URL y el estado.
+- [x] `/` responde 307 y usa las cabeceras de IP reales.
+- [x] Sin cabeceras, redirige a Bogotá (verificado en local; el edge de producción siempre añade las cabeceras).
+- [x] El GPS funciona por HTTPS.
+- [x] La regeneración respeta 3600 s (por configuración y cabeceras; no se esperó una hora).
+- [x] La atribución es visible en producción.
+- [x] README y `acceptance.md` reflejan la URL y el estado.
 
 ## Verificación
 
@@ -70,25 +70,29 @@ La app está desplegada en Vercel, `/` redirige con 307 usando las cabeceras rea
 
 - Si el plan gratuito de Vercel no registra las cabeceras esperadas, se documenta y se consulta al dueño.
 
-## Registro de ejecución y bloqueo (2026-11-04)
+## Registro de ejecución y desviación (2026-11-04)
 
-**Resultado.** Preparación completada; **despliegue no ejecutado**. No hay Vercel CLI, sesión ni token en el entorno. El dueño hará el despliegue manual desde el dashboard de Vercel y aportará la URL para cerrar la verificación de producción.
+**Resultado.** Task ejecutada. La app está desplegada en **https://vesper-sandy-seven.vercel.app/** y se verificó producción con `curl` y Chrome headless.
+
+### Verificación en producción
+
+- `/` responde `307` con `location: /clima/4.61_-74.08`; el edge usa las cabeceras de IP reales. Vercel sobrescribe las cabeceras `x-vercel-ip-*` que envíe el cliente, así que la ausencia de cabeceras solo se pudo probar en local.
+- `/clima/bogota` responde `200` con `x-vercel-cache: PRERENDER`, `x-nextjs-prerender: 1`, `x-nextjs-stale-time: 300` y pronóstico incrustado. El navegador hace 1 petición (bloque «ahora»).
+- Un slug no curado responde `200`, sirve la shell genérica y lleva `noindex, nofollow`; el navegador hace 2 peticiones (pronóstico + «ahora»).
+- Un slug inválido responde `404`.
+- La atribución a Open-Meteo con CC-BY 4.0 es visible.
+- El GPS funciona por HTTPS: `isSecureContext` es `true` y el clic con geolocalización simulada navega a `/clima/6.24_-75.58`.
+- No hay errores de hidratación en consola.
+- `canonical`, `sitemap.xml` y `robots.txt` usan la URL de producción, lo que confirma `NEXT_PUBLIC_SITE_URL`.
 
 ### Preparado
 
-- `README.md` actualizado con el estado real y una sección de despliegue manual.
-- `docs/specs/001-vesper/acceptance.md` creado y actualizado con el estado de producción pendiente (D5).
+- `README.md` actualizado con la URL y el estado.
+- `docs/specs/001-vesper/acceptance.md` actualizado con la sección de producción.
 - `docs/specs/001-vesper/tasks/README.md` actualizado.
-- No se creó `vercel.json`: el proyecto es un Next.js estándar y no usa `output: 'export'`; Vercel detecta la configuración con su preset de Next.js. No se añadió configuración innecesaria.
+- No se creó `vercel.json`: el proyecto es un Next.js estándar y no usa `output: 'export'`; Vercel detectó la configuración con su preset.
 
-### Pendiente (requiere el dueño)
+### Salvedad
 
-1. Conectar el repositorio en Vercel y desplegar (sin exportación estática pura).
-2. Definir `NEXT_PUBLIC_SITE_URL` con la URL de producción.
-3. Abrir `/` y comprobar `307` y el slug de coordenadas con las cabeceras reales.
-4. Abrir `/clima/bogota` y un slug no curado; comprobar la atribución.
-5. Probar el botón de GPS por HTTPS.
-6. Comprobar la regeneración de 3600 s en los registros.
-7. Aportar la URL para actualizar `README.md` y `acceptance.md` y marcar esta task como terminada.
-
-Los criterios de aceptación de la cabecera siguen sin marcar hasta que exista la verificación de producción.
+- **Regeneración de 3600 s:** el código declara `cacheLife('hours')` y el edge devuelve `x-nextjs-stale-time: 300`, pero no se esperó una hora para observar la regeneración. Queda verificado por configuración y cabeceras, no por medición temporal.
+- **Logs del servidor:** no son accesibles desde este entorno. La comprobación de que el servidor no llama a Open-Meteo en slugs no curados se hizo en local en T027; en producción la respuesta usa la shell genérica.

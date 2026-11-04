@@ -9,7 +9,7 @@ Combina dos fuentes:
 
 Es un proyecto personal y de portafolio: no es comercial, no tiene dominio propio y la interfaz está en español.
 
-> **Estado — versión 1.0:** app funcionalmente terminada y verificada en local contra los 16 criterios del SPEC §12 (2026-11-04; el criterio 6 pasa con la salvedad D2). La aceptación completa, con evidencia y desviaciones, vive en [`docs/specs/001-vesper/acceptance.md`](./docs/specs/001-vesper/acceptance.md). La publicación en Vercel (T029) queda pendiente de ejecución manual desde el dashboard; cuando exista la URL de producción se añadirá aquí.
+> **Estado — versión 1.0:** desplegada en **https://vesper-sandy-seven.vercel.app/** y verificada contra los 16 criterios del SPEC §12 (2026-11-04; el criterio 6 pasa con la salvedad D2). La aceptación completa, con evidencia y desviaciones, vive en [`docs/specs/001-vesper/acceptance.md`](./docs/specs/001-vesper/acceptance.md). T029 está cerrada; la regeneración de 3600 s se comprobó por configuración y cabeceras, no esperando una hora.
 
 ## Qué hace
 
@@ -179,29 +179,31 @@ La interfaz usa HTML semántico, etiquetas ARIA donde hacen falta, navegación p
 
 ## Despliegue en Vercel
 
+**Producción:** https://vesper-sandy-seven.vercel.app/
+
 El despliegue se hace manualmente desde el dashboard de Vercel. No hace falta `vercel.json`: el proyecto es un Next.js estándar, Vercel aplica su preset y **no** se usa `output: 'export'`, porque la caché del servidor necesita el runtime de Next.js.
 
 1. Importa el repositorio en Vercel y deja que detecte Next.js.
-2. Define la variable de entorno `NEXT_PUBLIC_SITE_URL` con la URL de producción (por ejemplo, `https://<proyecto>.vercel.app`). Es la base de `metadataBase`, del sitemap y de `robots`.
+2. Define la variable de entorno `NEXT_PUBLIC_SITE_URL` con la URL de producción. Es la base de `metadataBase`, del sitemap y de `robots`.
 3. Despliega y verifica en producción:
-   - `curl -I https://<deploy>/` debe devolver `307` y usar las cabeceras de IP de Vercel.
-   - Sin cabeceras de IP debe redirigir a `/clima/bogota`.
-   - `/clima/bogota` y un slug no curado deben mostrar la atribución a Open-Meteo.
-   - El botón «Usar mi ubicación precisa» debe funcionar por HTTPS.
-   - La regeneración de las ciudades curadas debe respetar 3600 s.
-4. Añade la URL a este README y a [`docs/specs/001-vesper/acceptance.md`](./docs/specs/001-vesper/acceptance.md), y marca T029 como terminada.
+   - `curl -I https://vesper-sandy-seven.vercel.app/` devuelve `307` y usa las cabeceras de IP de Vercel.
+   - Sin cabeceras de IP redirige a `/clima/bogota` (verificado en local; el edge de producción siempre añade las cabeceras).
+   - `/clima/bogota` y un slug no curado muestran la atribución a Open-Meteo.
+   - El botón «Usar mi ubicación precisa» funciona por HTTPS.
+   - La regeneración de las ciudades curadas respeta 3600 s (`cacheLife('hours')` y `x-nextjs-stale-time: 300`).
+4. La URL ya está en este README y en [`docs/specs/001-vesper/acceptance.md`](./docs/specs/001-vesper/acceptance.md); T029 está marcada como terminada.
 
 > El build depende de que Open-Meteo responda durante el prerenderizado. Si agota el tiempo de conexión, el build falla en lugar de generar la página sin datos iniciales. Está documentado como D4 en `acceptance.md` y requiere una corrección autorizada.
 
 ## Limitaciones conocidas de la versión 1
 
-| ID  | Limitación                                                                                 | Detalle                                                               |
-| --- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| D1  | El build hace 2 peticiones por ciudad curada (12 en total, no 6).                          | Solo pide pronósticos curados; no afecta al comportamiento de la app. |
-| D2  | La salida y puesta de la Luna no modelan la depresión del horizonte por altitud del sitio. | Diferencia ≤2 min contra horizonte geométrico; 7–9 min en Bogotá.     |
-| D3  | El panel lunar muestra los eventos del día local D, no exclusivamente los de la noche.     | El texto «Luna de esta noche» puede inducir a error.                  |
-| D4  | El build falla si Open-Meteo agota el tiempo de conexión.                                  | El SPEC §7.5 pide degradar a página sin datos iniciales.              |
-| D5  | La verificación en producción está pendiente de la URL y del despliegue manual.            | T029.                                                                 |
+| ID  | Limitación                                                                                  | Detalle                                                               |
+| --- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| D1  | El build hace 2 peticiones por ciudad curada (12 en total, no 6).                           | Solo pide pronósticos curados; no afecta al comportamiento de la app. |
+| D2  | La salida y puesta de la Luna no modelan la depresión del horizonte por altitud del sitio.  | Diferencia ≤2 min contra horizonte geométrico; 7–9 min en Bogotá.     |
+| D3  | El panel lunar muestra los eventos del día local D, no exclusivamente los de la noche.      | El texto «Luna de esta noche» puede inducir a error.                  |
+| D4  | El build falla si Open-Meteo agota el tiempo de conexión.                                   | El SPEC §7.5 pide degradar a página sin datos iniciales.              |
+| D5  | La regeneración de 3600 s se verificó por configuración y cabeceras, no esperando una hora. | Producción desplegada en https://vesper-sandy-seven.vercel.app/.      |
 
 Las causas, evidencias y decisiones están en [`acceptance.md`](./docs/specs/001-vesper/acceptance.md).
 

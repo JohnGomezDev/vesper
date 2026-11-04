@@ -5,7 +5,7 @@
 - **Entorno:** Linux, Node `v24.19.0`, pnpm `11.21.0`, Next.js `16.4.1`, Chrome headless `155.0.8059.84`.
 - **Servidor usado:** build de producción local (`pnpm build` + `pnpm start --port 3100`) y navegador con Chrome DevTools Protocol.
 - **Alcance:** criterios §12 del SPEC, reparto de red §7.1 y casos límite/contraste astronómico de T028.
-- **Estado de producción:** pendiente. T029 se preparó para despliegue manual desde el dashboard de Vercel; no hay URL de producción todavía.
+- **URL de producción:** https://vesper-sandy-seven.vercel.app/ (desplegada el 2026-11-04).
 
 ## Método y evidencia
 
@@ -121,6 +121,27 @@ La iluminación de JPL disminuye entre el 3 y el 5 de noviembre, lo que confirma
 
 > El build también se ejecutó mientras Open-Meteo agotaba el tiempo de conexión y falló. Ese comportamiento se registra como desviación D4 y queda escalado; la ejecución final con red sana terminó en `0`.
 
+## Producción (T029)
+
+- **URL:** https://vesper-sandy-seven.vercel.app/
+- **Fecha de verificación:** 2026-11-04
+- **Cliente de pruebas:** `curl` y Chrome headless sobre HTTPS.
+
+| Comprobación                    | Resultado                                                                                                                                                                                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/` responde `307`              | Sí. `location: /clima/4.61_-74.08`; `cache-control: public, max-age=0, must-revalidate`; `server: Vercel`.                                                                                                                                   |
+| Cabeceras de IP reales          | Sí. La redirección usa las coordenadas de la IP del visitante, no una ciudad curada. Vercel sobrescribe las cabeceras `x-vercel-ip-*` enviadas por el cliente, así que no se puede simular la ausencia de cabeceras contra el edge.          |
+| Sin cabeceras redirige a Bogotá | Verificado en local (`pnpm start` sin cabeceras → `/clima/bogota`) y en las pruebas de `ip-location.test.ts`. En producción el edge siempre añade las cabeceras.                                                                             |
+| `/clima/bogota`                 | `200`; `x-vercel-cache: PRERENDER`; `x-nextjs-prerender: 1`; `x-nextjs-stale-time: 300`; pronóstico incrustado (`fetchedAt`) y 1 petición de navegador (`current`).                                                                          |
+| Slug no curado                  | `200`; shell genérica (`x-matched-path: /clima/[slug]`); `noindex, nofollow`; 2 peticiones de navegador (`forecast` + `current`).                                                                                                            |
+| Slug inválido                   | `404`.                                                                                                                                                                                                                                       |
+| Atribución                      | Visible en producción: «Datos de clima de Open-Meteo (CC-BY 4.0)».                                                                                                                                                                           |
+| GPS por HTTPS                   | `window.isSecureContext === true`; clic en «Usar mi ubicación precisa» con geolocalización simulada en `6.2442, -75.5812` navega a `/clima/6.24_-75.58`, sin error.                                                                          |
+| Hidratación                     | Sin errores ni warnings de consola en `/clima/bogota`, slug no curado, `/` y flujo GPS.                                                                                                                                                      |
+| Metadata                        | `canonical` y `sitemap.xml` usan `https://vesper-sandy-seven.vercel.app`; `robots.txt` apunta al sitemap de producción.                                                                                                                      |
+| Regeneración 3600 s             | El código declara `cacheLife('hours')` (revalidate 1 h) y el edge devuelve `x-nextjs-stale-time: 300`. No se esperó una hora para observar la regeneración; queda como verificación por configuración y cabeceras, no por medición temporal. |
+| Logs del servidor               | No accesibles desde el entorno. La comprobación de que el servidor no llama a Open-Meteo en slugs no curados se hizo en local en T027; en producción la respuesta usa la shell genérica.                                                     |
+
 ## Desviaciones y escalaciones
 
 ### D1 — El build hace 2 peticiones por ciudad curada (12, no 6)
@@ -150,8 +171,8 @@ La iluminación de JPL disminuye entre el 3 y el 5 de noviembre, lo que confirma
 - **Situación:** el `try/catch` de `CuratedNight` no evita que el fallo de escritura de la caché de `'use cache'` aborte el build. No se modificó código.
 - **Decisión:** documentar y escalar. Requiere una corrección autorizada (por ejemplo, revisar el manejo de errores de la función cacheada o la configuración de prerenderizado).
 
-### D5 — Verificación de producción pendiente (T029)
+### D5 — Verificación de producción (T029)
 
-- **Observado:** no hay Vercel CLI, sesión ni token en el entorno. El dueño hará el despliegue manual desde el dashboard.
-- **Pendiente:** URL de producción, `NEXT_PUBLIC_SITE_URL`, comprobación de `307` con cabeceras reales, GPS por HTTPS, regeneración de 3600 s y atribución en producción.
-- **Decisión:** T029 queda pendiente de verificación en producción; el README y la documentación de despliegue se dejaron listos.
+- **Resuelto:** la app está desplegada en https://vesper-sandy-seven.vercel.app/ y se verificaron `307` con cabeceras reales, GPS por HTTPS, atribución, metadata y ausencia de errores de hidratación.
+- **Salvedad:** no se esperó una hora para medir la regeneración; se comprobó `cacheLife('hours')` en el código y `x-nextjs-stale-time: 300` en el edge. Los logs del servidor de producción no son accesibles desde el entorno.
+- **Decisión:** T029 se considera terminada con esa salvedad documentada.
