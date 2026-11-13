@@ -155,7 +155,7 @@ function NightContent({ slug, parsedSlug, initialData }: INightContentProps): Re
       </header>
 
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden px-4 py-5 [contain:paint]">
-        <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
           <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-[4px] border p-3">
             <div className="flex min-w-0 items-start gap-3">
               <span className="border-primary/40 bg-primary/10 text-primary inline-flex size-9 shrink-0 items-center justify-center rounded-none border">
